@@ -185,8 +185,6 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
     <p class="api-intro">This is a private family resource.<br>Enter your API key to begin.</p>
     <div class="field-label">Anthropic API Key (required)</div>
     <input type="password" id="apiIn" placeholder="sk-ant-..." autocomplete="off" />
-    <div class="field-label" style="margin-top:4px">API.Bible Key (for Bible Search room)</div>
-    <input type="text" id="bibleApiIn" placeholder="e.g. wEgT2Ne_..." autocomplete="off" />
     <div class="field-label" style="margin-top:4px">Firebase URL (optional — needed for Family Room sync)</div>
     <input type="text" id="fbIn" placeholder="https://your-project-default-rtdb.firebaseio.com" autocomplete="off" />
     <button class="primary-btn" onclick="saveSetup()">Enter</button>
@@ -227,7 +225,6 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
   <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding-bottom:40px">
     <button class="enter-btn" onclick="enterPrivate()">Enter — Tozer</button>
     <button class="enter-btn" style="border-color:rgba(100,160,200,0.4);color:#a8d0f0" onclick="enterScripture()">Enter — Scripture Study</button>
-    <button class="enter-btn" style="border-color:rgba(100,200,120,0.4);color:#90d890" onclick="go('s-biblesearch');initBibleSearch()">Enter — Bible Search</button>
     <button class="enter-btn" style="border-color:rgba(200,160,100,0.4);color:#f0c878" onclick="go('s-resources');initResources()">Enter — Resource Room</button>
     <div class="enter-hint">Bring what you are actually carrying</div>
   </div>
@@ -246,7 +243,6 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
         <button class="nav-tab active">Private</button>
         <button class="nav-tab" onclick="enterFamily()">Family</button>
         <button class="nav-tab" onclick="enterScripture()">Scripture</button>
-        <button class="nav-tab" onclick="go('s-biblesearch');initBibleSearch()">Bible</button>
         <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
       </div>
       <button id="clear-conv" onclick="window.clearConv()" style="display:none;background:transparent;border:none;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color='#c07070'" onmouseout="this.style.color='var(--text-faint)'">✕ Clear conversation</button>
@@ -293,7 +289,6 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
       <button class="nav-tab" onclick="go('s-priv')">Private</button>
       <button class="nav-tab active">Family</button>
       <button class="nav-tab" onclick="enterScripture()">Scripture</button>
-      <button class="nav-tab" onclick="go('s-biblesearch');initBibleSearch()">Bible</button>
         <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
     </div>
   </div>
@@ -328,7 +323,6 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
         <button class="nav-tab" onclick="go('s-priv')">Private</button>
         <button class="nav-tab" onclick="enterFamily()">Family</button>
         <button class="nav-tab active" style="border-color:rgba(100,160,200,0.5);color:#a8d0f0;background:rgba(40,80,120,0.3)">Scripture</button>
-        <button class="nav-tab" onclick="go('s-biblesearch');initBibleSearch()">Bible</button>
         <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
       </div>
       <button id="clear-bible" onclick="window.clearBible()" style="display:none;background:transparent;border:none;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color='#c07070'" onmouseout="this.style.color='var(--text-faint)'">✕ Clear session</button>
@@ -365,160 +359,6 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
 
 </div>
 
-<!-- BIBLE SEARCH ROOM -->
-<div id="s-biblesearch" class="screen">
-  <div class="chat-hdr">
-    <button class="back-link" onclick="go('s-who')">← Change</button>
-    <div class="chat-hdr-center">
-      <div class="chat-hdr-title" style="color:#90d890">Bible Search</div>
-      <div class="chat-hdr-sub">Search · Compare Translations</div>
-    </div>
-    <div class="nav-tabs">
-      <button class="nav-tab" onclick="go('s-priv')">Private</button>
-      <button class="nav-tab" onclick="enterFamily()">Family</button>
-      <button class="nav-tab" onclick="enterScripture()">Scripture</button>
-      <button class="nav-tab active" style="border-color:rgba(100,200,120,0.5);color:#90d890;background:rgba(40,100,60,0.3)">Bible</button>
-      <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
-    </div>
-  </div>
-
-  <!-- Search bar -->
-  <div style="margin-bottom:16px">
-    <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px">Enter any passage reference</div>
-    <div style="display:flex;gap:8px">
-      <input type="text" id="bs-input" placeholder="e.g. John 3:16 or Psalm 23 or Romans 8:28-39"
-        style="flex:1;background:rgba(10,8,4,0.8);border:1px solid rgba(100,200,120,0.3);border-radius:3px;padding:13px 16px;color:#ffffff;font-size:17px;font-family:'Palatino Linotype',Georgia,serif;font-style:italic;outline:none"
-        onkeydown="if(event.key==='Enter') bsearch()"
-        onfocus="this.style.borderColor='rgba(100,200,120,0.6)'"
-        onblur="this.style.borderColor='rgba(100,200,120,0.3)'" />
-      <button onclick="bsearch()" style="background:rgba(40,100,60,0.4);border:1px solid rgba(100,200,120,0.4);border-radius:3px;padding:0 20px;color:#90d890;font-size:20px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(40,100,60,0.7)'" onmouseout="this.style.background='rgba(40,100,60,0.4)'">⌕</button>
-    </div>
-    <div style="font-family:'Courier New',monospace;font-size:10px;color:var(--text-faint);margin-top:6px;letter-spacing:0.1em">Powered by API.Bible · Type any reference and press Enter</div>
-  </div>
-
-  <!-- Translation selector -->
-  <div style="margin-bottom:20px">
-    <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px">Translation</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px" id="bs-trans-btns">
-      <span style="font-family:'Courier New',monospace;font-size:10px;color:var(--text-faint)">Enter your API.Bible key in setup to load translations</span>
-    </div>
-  </div>
-
-  <!-- Quick references -->
-  <div style="margin-bottom:24px">
-    <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px">Quick references</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px">
-      <button class="qref" onclick="quickRef(this)">John 3:16</button>
-      <button class="qref" onclick="quickRef(this)">Proverbs 3:5-6</button>
-      <button class="qref" onclick="quickRef(this)">Psalm 23</button>
-      <button class="qref" onclick="quickRef(this)">Romans 8:28-39</button>
-      <button class="qref" onclick="quickRef(this)">Isaiah 40:31</button>
-      <button class="qref" onclick="quickRef(this)">Philippians 4:13</button>
-      <button class="qref" onclick="quickRef(this)">Jeremiah 29:11</button>
-      <button class="qref" onclick="quickRef(this)">Matthew 6:33</button>
-      <button class="qref" onclick="quickRef(this)">Hebrews 11:1</button>
-      <button class="qref" onclick="quickRef(this)">James 1:2-4</button>
-      <button class="qref" onclick="quickRef(this)">1 Corinthians 13:4-8</button>
-      <button class="qref" onclick="quickRef(this)">Psalm 46:10</button>
-    </div>
-  </div>
-
-  <!-- Results -->
-  <div id="bs-results"></div>
-
-  <!-- Loading -->
-  <div id="bs-loading" style="display:none;text-align:center;padding:30px">
-    <div class="tw" style="justify-content:center"><div class="dot" style="background:#90d890"></div><div class="dot" style="background:#90d890"></div><div class="dot" style="background:#90d890"></div></div>
-  </div>
-
-</div>
-
-</div>
-
-<style>
-.trans-btn {
-  background: transparent;
-  border: 1px solid rgba(100,200,120,0.25);
-  border-radius: 20px;
-  padding: 7px 16px;
-  font-family: 'Courier New',monospace;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  color: var(--text-faint);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.trans-btn.active {
-  background: rgba(40,100,60,0.4);
-  border-color: rgba(100,200,120,0.6);
-  color: #90d890;
-}
-.trans-btn:hover:not(.active) {
-  border-color: rgba(100,200,120,0.4);
-  color: var(--text-dim);
-}
-.qref {
-  background: transparent;
-  border: 1px solid rgba(100,200,120,0.2);
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-family: 'Palatino Linotype',Georgia,serif;
-  font-size: 14px;
-  font-style: italic;
-  color: var(--text-faint);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.qref:hover {
-  background: rgba(40,100,60,0.2);
-  border-color: rgba(100,200,120,0.4);
-  color: #90d890;
-}
-.trans-result {
-  background: rgba(22,16,8,0.7);
-  border: 1px solid rgba(100,200,120,0.2);
-  border-top: 2px solid rgba(100,200,120,0.4);
-  border-radius: 4px;
-  padding: 18px 20px;
-  margin-bottom: 14px;
-}
-.trans-name {
-  font-family: 'Courier New',monospace;
-  font-size: 11px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: #90d890;
-  margin-bottom: 10px;
-}
-.trans-ref {
-  font-family: 'Courier New',monospace;
-  font-size: 11px;
-  color: var(--text-faint);
-  margin-bottom: 10px;
-}
-.trans-text {
-  font-size: 17px;
-  line-height: 1.9;
-  color: #ffffff;
-  white-space: pre-wrap;
-}
-.bs-error {
-  color: #c08080;
-  font-style: italic;
-  font-size: 15px;
-  padding: 10px 0;
-}
-.search-header {
-  font-family: 'Courier New',monospace;
-  font-size: 11px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(100,200,120,0.15);
-}
-</style>
 
 <!-- RESOURCE ROOM -->
 <div id="s-resources" class="screen">
@@ -532,7 +372,6 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
       <button class="nav-tab" onclick="go('s-priv')">Private</button>
       <button class="nav-tab" onclick="enterFamily()">Family</button>
       <button class="nav-tab" onclick="enterScripture()">Scripture</button>
-      <button class="nav-tab" onclick="go('s-biblesearch');initBibleSearch()">Bible</button>
       <button class="nav-tab active" style="border-color:rgba(200,160,100,0.5);color:#f0c878;background:rgba(80,60,20,0.4)">Resources</button>
     </div>
   </div>
@@ -646,7 +485,6 @@ Be thorough but not exhausting. Every word earns its place. The goal is not to i
 // ── STATE ────────────────────────────────────
 let apiKey = '';
 let fbUrl  = '';
-let bibleApiKey = '';
 let who    = '';
 let privH  = [];
 let bibleH = [];
@@ -670,8 +508,6 @@ function initFB(url) {
 window.onload = () => {
   const k = localStorage.getItem('tz_key');
   const f = localStorage.getItem('tz_fb');
-  const bk = localStorage.getItem('tz_bible_api');
-  if (bk) bibleApiKey = bk;
   if (k) {
     apiKey = k;
     if (f) { fbUrl = f; try { initFB(f); } catch(e) {} }
@@ -697,8 +533,6 @@ window.saveSetup = function() {
   }
   apiKey = k;
   localStorage.setItem('tz_key', k);
-  const bk = document.getElementById('bibleApiIn').value.trim();
-  if (bk) { bibleApiKey = bk; localStorage.setItem('tz_bible_api', bk); }
   if (f) {
     fbUrl = f;
     localStorage.setItem('tz_fb', f);
@@ -1020,147 +854,6 @@ function dn() { setTimeout(()=>window.scrollTo(0,document.body.scrollHeight),80)
 function x(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
 }
-// ── BIBLE SEARCH ─────────────────────────────
-const BOLLS_TRANS = {
-  KJV:  'KJV',
-  NIV:  'NIV',
-  ESV:  'ESV',
-  NASB: 'NASB',
-  NLT:  'NLT',
-  NKJV: 'NKJV',
-  MSG:  'MSG',
-  AMP:  'AMP'
-};
-
-// ── BIBLE SEARCH (API.Bible) ─────────────────
-const APIBIBLE_URL = 'https://api.scripture.api.bible/v1';
-let selectedBibleId = '';
-let availableBibles = [];
-
-window.initBibleSearch = async function() {
-  document.getElementById('bs-input').value = '';
-  document.getElementById('bs-results').innerHTML = '';
-  document.getElementById('bs-loading').style.display = 'none';
-
-  if (!bibleApiKey) {
-    document.getElementById('bs-results').innerHTML = `<div style="color:var(--text-faint);font-style:italic;font-size:15px;padding:10px 0">No API.Bible key found. Log out and re-enter your setup including the API.Bible key.</div>`;
-    return;
-  }
-
-  // Load available translations from this key
-  if (availableBibles.length === 0) {
-    await loadBibles();
-  }
-};
-
-async function loadBibles() {
-  const transEl = document.getElementById('bs-trans-btns');
-  transEl.innerHTML = `<span style="font-family:'Courier New',monospace;font-size:10px;color:var(--text-faint)">Loading your translations...</span>`;
-
-  try {
-    const res = await fetch(`${APIBIBLE_URL}/bibles?language=eng`, {
-      headers: { 'api-key': bibleApiKey }
-    });
-    const data = await res.json();
-    if (!data.data) throw new Error('No data');
-
-    // Filter to most useful English translations
-    const preferred = ['KJV','NIV','ESV','NASB','NLT','NKJV','WEB','ASV','MSG','AMP','CSB','NCV'];
-    availableBibles = data.data.filter(b =>
-      preferred.some(p => b.abbreviation && b.abbreviation.toUpperCase().includes(p))
-    ).slice(0, 10);
-
-    if (availableBibles.length === 0) {
-      availableBibles = data.data.filter(b => b.language && b.language.id === 'eng').slice(0, 8);
-    }
-
-    selectedBibleId = availableBibles[0]?.id || '';
-
-    transEl.innerHTML = availableBibles.map((b, i) => `
-      <button class="trans-btn ${i === 0 ? 'active' : ''}"
-        data-bible="${b.id}"
-        onclick="selectTrans(this)">
-        ${b.abbreviation || b.nameLocal || b.name}
-      </button>`).join('');
-
-  } catch(e) {
-    transEl.innerHTML = `<span style="font-family:'Courier New',monospace;font-size:10px;color:#e09090">Could not load translations. Check your API.Bible key.</span>`;
-  }
-}
-
-window.selectTrans = function(btn) {
-  document.querySelectorAll('.trans-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  selectedBibleId = btn.dataset.bible;
-};
-
-window.quickRef = function(btn) {
-  document.getElementById('bs-input').value = btn.textContent.trim();
-  bsearch();
-};
-
-window.bsearch = async function() {
-  const query = document.getElementById('bs-input').value.trim();
-  if (!query) return;
-  if (!bibleApiKey) return;
-  if (!selectedBibleId) { await loadBibles(); if (!selectedBibleId) return; }
-
-  const resultsEl = document.getElementById('bs-results');
-  const loadingEl = document.getElementById('bs-loading');
-  resultsEl.innerHTML = '';
-  loadingEl.style.display = 'block';
-
-  try {
-    const transName = document.querySelector('.trans-btn.active')?.textContent?.trim() || 'Bible';
-
-    // Use search endpoint — accepts natural language like "John 3:16"
-    const url = `${APIBIBLE_URL}/bibles/${selectedBibleId}/search?query=${encodeURIComponent(query)}&limit=8&sort=relevance`;
-    const res = await fetch(url, { headers: { 'api-key': bibleApiKey } });
-    const data = await res.json();
-
-    loadingEl.style.display = 'none';
-
-    if (!data.data || (!data.data.verses?.length && !data.data.passages?.length)) {
-      resultsEl.innerHTML = `
-        <div style="background:rgba(22,16,8,0.7);border:1px solid rgba(200,100,100,0.25);border-radius:6px;padding:18px 20px">
-          <div style="color:#e09090;font-size:15px;margin-bottom:8px">No results found for "${x(query)}"</div>
-          <div style="color:var(--text-faint);font-size:13px;line-height:1.8">
-            Try a specific reference like:<br>
-            <span style="color:#90d890;font-family:'Courier New',monospace">John 3:16</span> &nbsp;·&nbsp;
-            <span style="color:#90d890;font-family:'Courier New',monospace">Psalm 23</span> &nbsp;·&nbsp;
-            <span style="color:#90d890;font-family:'Courier New',monospace">Romans 8:28</span>
-          </div>
-        </div>`;
-      return;
-    }
-
-    const verses = data.data.verses || [];
-    const query_ref = data.data.query || query;
-
-    // Group consecutive verses from same chapter into blocks
-    let html = `
-      <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-faint);margin-bottom:14px">
-        ${x(transName)} · ${verses.length} verse${verses.length !== 1 ? 's' : ''} found
-      </div>`;
-
-    verses.forEach(v => {
-      const cleanText = (v.text || '').replace(/<[^>]*>/g, '').trim();
-      html += `
-        <div style="background:rgba(22,16,8,0.7);border:1px solid rgba(100,200,120,0.2);border-left:3px solid rgba(100,200,120,0.5);border-radius:0 6px 6px 0;padding:16px 18px;margin-bottom:10px">
-          <div style="font-family:'Courier New',monospace;font-size:11px;color:#90d890;margin-bottom:10px;letter-spacing:0.1em">${x(v.reference)}</div>
-          <div style="font-size:18px;line-height:2;color:#ffffff">${x(cleanText)}</div>
-        </div>`;
-    });
-
-    resultsEl.innerHTML = html;
-
-  } catch(e) {
-    loadingEl.style.display = 'none';
-    resultsEl.innerHTML = `<div style="color:var(--text-faint);font-style:italic;font-size:15px;padding:10px">Connection error. Check your internet and try again.</div>`;
-  }
-};
-
-
 // ── RESOURCE ROOM ────────────────────────────
 
 const TIMELINE = [
