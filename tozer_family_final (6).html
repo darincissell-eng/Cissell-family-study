@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cissell Family Study</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #171210;
+  --gold: #d4aa44;
+  --gold-light: #f0d080;
+  --gold-dim: #d4aa44;
+  --gold-faint: #8a6828;
+  --text: #ffffff;
+  --text-dim: #ffffff;
+  --text-faint: #e0c070;
+  --border: rgba(212,170,68,0.4);
+  --panel: rgba(28,20,10,0.85);
+}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
+  font-size: 18px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.wrap { width: 100%; max-width: 680px; padding: 0 18px; display: flex; flex-direction: column; min-height: 100vh; }
+.screen { display: none; flex-direction: column; width: 100%; }
+.screen.active { display: flex; }
+
+/* SHARED */
+.ornament { color: var(--gold); font-size: 18px; opacity: 0.7; letter-spacing: 10px; margin-bottom: 16px; }
+.eyebrow { font-family: 'Courier New',monospace; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+.rule { width: 50px; height: 1px; background: linear-gradient(90deg,transparent,var(--gold),transparent); margin: 0 auto 18px; }
+.main-title { font-size: clamp(30px,7vw,50px); font-weight: 400; font-style: italic; color: #ffffff; letter-spacing: 0.05em; line-height: 1; margin-bottom: 6px; }
+.dates { font-family: 'Courier New',monospace; font-size: 11px; color: var(--text-faint); letter-spacing: 0.2em; margin-bottom: 16px; }
+
+/* API */
+#s-api { align-items: center; justify-content: center; min-height: 100vh; padding: 40px 0; text-align: center; }
+.api-box { background: var(--panel); border: 1px solid var(--border); border-top: 2px solid rgba(200,160,60,0.5); border-radius: 3px; padding: 36px 28px; width: 100%; max-width: 420px; }
+.api-intro { font-size: 17px; color: var(--text-dim); line-height: 1.8; margin-bottom: 22px; font-style: italic; }
+.field-label { font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 8px; text-align: left; }
+input[type="password"], input[type="text"] { width: 100%; background: rgba(10,8,4,0.8); border: 1px solid var(--border); border-radius: 2px; padding: 12px 14px; color: var(--text); font-size: 17px; font-family: 'Courier New',monospace; outline: none; margin-bottom: 14px; transition: border-color 0.2s; }
+input:focus { border-color: var(--gold); }
+.primary-btn { background: rgba(101,67,33,0.4); border: 1px solid rgba(200,160,60,0.45); color: var(--gold-light); padding: 13px 32px; font-family: 'Palatino Linotype',Georgia,serif; font-size: 17px; font-style: italic; cursor: pointer; border-radius: 2px; transition: all 0.25s; width: 100%; }
+.primary-btn:hover { background: rgba(101,67,33,0.6); }
+
+/* WHO */
+#s-who { align-items: center; justify-content: center; min-height: 100vh; text-align: center; padding: 40px 0; }
+.person-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 380px; margin: 0 auto; }
+.person-btn { background: rgba(30,22,12,0.8); border: 1px solid var(--border); border-radius: 3px; padding: 22px 16px; cursor: pointer; transition: all 0.25s; text-align: center; }
+.person-btn:hover { background: rgba(101,67,33,0.25); border-color: var(--gold); transform: translateY(-2px); }
+.person-name { font-size: 20px; font-style: italic; color: #ffffff; margin-bottom: 4px; }
+.person-role { font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); }
+
+/* LANDING */
+#s-land { align-items: center; padding: 44px 0 40px; text-align: center; }
+.tozer-quote { font-style: italic; font-size: 17px; color: #ffffff; line-height: 1.85; max-width: 480px; margin-bottom: 32px; }
+.letter { background: var(--panel); border: 1px solid var(--border); border-top: 2px solid rgba(200,160,60,0.4); border-radius: 2px; padding: 28px 28px 24px; width: 100%; margin-bottom: 28px; text-align: left; }
+.letter-label { font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 16px; }
+.letter-body { font-size: 17px; line-height: 2; color: #ffffff; }
+.letter-body p { margin-bottom: 12px; }
+.letter-body p:last-child { margin-bottom: 0; }
+.letter-sig { margin-top: 20px; padding-top: 14px; border-top: 1px solid rgba(200,160,60,0.15); font-style: italic; color: var(--text-dim); font-size: 17px; }
+.enter-btn { background: transparent; border: 1px solid rgba(200,160,60,0.4); color: var(--gold-light); padding: 13px 44px; font-family: 'Palatino Linotype',Georgia,serif; font-size: 17px; font-style: italic; cursor: pointer; border-radius: 2px; transition: all 0.25s; margin-bottom: 10px; }
+.enter-btn:hover { background: rgba(101,67,33,0.2); border-color: var(--gold); }
+.enter-hint { font-family: 'Courier New',monospace; font-size: 9px; color: var(--text-faint); letter-spacing: 0.2em; text-transform: uppercase; }
+
+/* CHAT HEADER */
+.chat-hdr { padding: 18px 0 14px; border-bottom: 1px solid var(--border); margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
+.chat-hdr-center { text-align: center; flex: 1; }
+.chat-hdr-title { font-size: 18px; font-weight: 400; font-style: italic; color: #ffffff; }
+.chat-hdr-sub { font-family: 'Courier New',monospace; font-size: 9px; color: var(--text-faint); letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px; }
+.nav-tabs { display: flex; gap: 5px; flex-shrink: 0; }
+.nav-tab { background: transparent; border: 1px solid var(--border); border-radius: 2px; padding: 6px 12px; font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); cursor: pointer; transition: all 0.2s; }
+.nav-tab.active { background: rgba(101,67,33,0.35); border-color: var(--gold); color: var(--gold-light); }
+.nav-tab:hover:not(.active) { border-color: var(--gold-dim); color: var(--text-dim); }
+.back-link { font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); cursor: pointer; background: none; border: none; flex-shrink: 0; transition: color 0.2s; }
+.back-link:hover { color: var(--gold-dim); }
+
+/* PRIVATE MESSAGES */
+.msgs { display: flex; flex-direction: column; gap: 26px; padding-bottom: 16px; }
+.msg-user { display: flex; justify-content: flex-end; }
+.msg-user-inner { max-width: 78%; background: rgba(50,35,15,0.6); border: 1px solid rgba(200,160,60,0.2); border-radius: 10px 10px 2px 10px; padding: 14px 18px; font-size: 17px; color: #ffffff; line-height: 1.8; font-style: italic; }
+.msg-tozer { display: flex; flex-direction: column; }
+.msg-lbl { font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+.msg-lbl span { display: block; width: 22px; height: 1px; background: var(--gold-dim); }
+.msg-text { font-size: 17px; line-height: 2; color: #ffffff; border-left: 2px solid rgba(200,160,60,0.3); padding-left: 16px; white-space: pre-wrap; }
+.share-btn { background: transparent; border: 1px solid rgba(200,160,60,0.25); border-radius: 2px; padding: 5px 12px; font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold-dim); cursor: pointer; margin-top: 10px; transition: all 0.2s; margin-left: 18px; }
+.share-btn:hover { background: rgba(101,67,33,0.2); border-color: var(--gold); color: var(--gold-light); }
+.shared-badge { font-family: 'Courier New',monospace; font-size: 9px; color: var(--gold-dim); letter-spacing: 0.12em; margin-top: 8px; margin-left: 18px; }
+
+/* SUGGESTIONS */
+.sw { margin-bottom: 22px; }
+.slbl { font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 10px; }
+.sl { display: flex; flex-direction: column; gap: 5px; }
+.sb { background: transparent; border: none; border-left: 2px solid rgba(200,160,60,0.3); padding: 10px 14px; text-align: left; color: #ffffff; font-size: 16px; font-family: 'Palatino Linotype',Georgia,serif; font-style: italic; cursor: pointer; line-height: 1.6; transition: all 0.2s; border-radius: 0 3px 3px 0; }
+.sb:hover { background: rgba(101,67,33,0.14); color: var(--text); border-left-color: var(--gold); }
+
+/* FAMILY BOARD */
+.board { display: flex; flex-direction: column; gap: 16px; padding-bottom: 16px; }
+
+.post {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 18px;
+}
+.post-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.post-who { font-family: 'Courier New',monospace; font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-dim); }
+.post-time { font-family: 'Courier New',monospace; font-size: 9px; color: var(--text-faint); }
+.post-body { font-size: 17px; line-height: 1.9; color: #ffffff; white-space: pre-wrap; }
+
+/* REPLIES */
+.replies { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(200,160,60,0.12); display: flex; flex-direction: column; gap: 10px; }
+.reply { padding: 10px 14px; background: rgba(40,28,12,0.6); border-radius: 4px; border-left: 2px solid rgba(200,160,60,0.2); }
+.reply-who { font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 5px; }
+.reply-body { font-size: 16px; line-height: 1.8; color: #ffffff; white-space: pre-wrap; }
+
+.reply-btn { background: transparent; border: none; font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); cursor: pointer; margin-top: 10px; padding: 4px 0; transition: color 0.2s; }
+.reply-btn:hover { color: var(--gold-dim); }
+
+.reply-form { margin-top: 10px; display: none; }
+.reply-form textarea { width: 100%; background: rgba(10,8,4,0.7); border: 1px solid rgba(200,160,60,0.2); border-radius: 2px; padding: 10px 12px; color: var(--text); font-size: 13.5px; font-family: 'Palatino Linotype',Georgia,serif; font-style: italic; resize: none; line-height: 1.6; outline: none; min-height: 44px; }
+.reply-form textarea:focus { border-color: var(--gold-dim); }
+.reply-submit { background: transparent; border: 1px solid rgba(200,160,60,0.25); border-radius: 2px; padding: 5px 14px; font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold-dim); cursor: pointer; margin-top: 7px; transition: all 0.2s; }
+.reply-submit:hover { background: rgba(101,67,33,0.2); border-color: var(--gold); color: var(--gold-light); }
+
+.delete-btn { background: transparent; border: none; font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #a06060; cursor: pointer; transition: color 0.2s; padding: 0; }
+.delete-btn:hover { color: #e07070; }
+
+.board-empty { text-align: center; padding: 40px 16px; font-style: italic; color: var(--text-faint); font-size: 17px; line-height: 1.8; }
+.board-loading { text-align: center; padding: 24px; font-family: 'Courier New',monospace; font-size: 9px; color: var(--text-faint); letter-spacing: 0.2em; }
+
+/* NEW POST */
+.new-post-area { margin-bottom: 24px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; }
+.new-post-label { font-family: 'Courier New',monospace; font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 10px; }
+.new-post-area textarea { width: 100%; background: rgba(10,8,4,0.7); border: 1px solid rgba(200,160,60,0.2); border-radius: 2px; padding: 13px 15px; color: var(--text); font-size: 17px; font-family: 'Palatino Linotype',Georgia,serif; font-style: italic; resize: none; line-height: 1.7; outline: none; min-height: 70px; }
+.new-post-area textarea:focus { border-color: var(--gold-dim); }
+.post-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; flex-wrap: wrap; gap: 8px; }
+.post-submit { background: rgba(101,67,33,0.35); border: 1px solid rgba(200,160,60,0.4); color: var(--gold-light); padding: 8px 20px; font-family: 'Palatino Linotype',Georgia,serif; font-size: 13px; font-style: italic; cursor: pointer; border-radius: 2px; transition: all 0.25s; }
+.post-submit:hover { background: rgba(101,67,33,0.55); }
+.post-submit:disabled { opacity: 0.3; cursor: not-allowed; }
+.post-hint { font-family: 'Courier New',monospace; font-size: 9px; color: var(--text-faint); letter-spacing: 0.12em; text-transform: uppercase; }
+
+/* TYPING */
+.tw { display: flex; gap: 6px; align-items: center; padding-left: 18px; height: 26px; }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); opacity: 0.4; animation: p 1.4s ease-in-out infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes p { 0%,100%{opacity:.2;transform:scale(.7)}50%{opacity:.85;transform:scale(1.2)} }
+
+/* INPUT */
+.ia { position: sticky; bottom: 0; background: linear-gradient(0deg,var(--bg) 80%,transparent); padding: 16px 0 28px; flex-shrink: 0; }
+.ib { display: flex; border: 1px solid rgba(200,160,60,0.3); border-radius: 3px; background: rgba(14,9,4,0.97); overflow: hidden; }
+textarea.main-ta { flex: 1; background: transparent; border: none; outline: none; padding: 14px 16px; color: var(--text); font-size: 17px; font-family: 'Palatino Linotype',Georgia,serif; font-style: italic; resize: none; line-height: 1.6; min-height: 56px; }
+textarea.main-ta::placeholder { color: var(--text-faint); }
+.sbtn { background: transparent; border: none; border-left: 1px solid rgba(200,160,60,0.2); padding: 0 18px; color: var(--gold-faint); font-size: 18px; cursor: pointer; transition: all 0.2s; }
+.sbtn:hover:not(:disabled) { background: rgba(101,67,33,0.3); color: var(--gold-light); }
+.sbtn:disabled { opacity: 0.2; cursor: not-allowed; }
+.ihint { text-align: center; font-family: 'Courier New',monospace; font-size: 9px; color: var(--text-faint); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 7px; }
+
+@media(max-width:480px) {
+  .letter { padding: 20px 16px; }
+  .person-grid { gap: 10px; }
+  .nav-tab { padding: 5px 8px; font-size: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- API -->
+<div id="s-api" class="screen active">
+  <div class="api-box" style="margin:auto">
+    <div class="ornament">✦ ✦ ✦</div>
+    <div class="eyebrow">Private · Family Resource</div>
+    <div class="main-title">Cissell Family Study</div>
+    <div class="dates">Tozer · Scripture · Family</div>
+    <div class="rule"></div>
+    <p class="api-intro">This is a private family resource.<br>Enter your API key to begin.</p>
+    <div class="field-label">Anthropic API Key (required)</div>
+    <input type="password" id="apiIn" placeholder="sk-ant-..." autocomplete="off" />
+    <div class="field-label" style="margin-top:4px">API.Bible Key (for Bible Search room)</div>
+    <input type="text" id="bibleApiIn" placeholder="e.g. wEgT2Ne_..." autocomplete="off" />
+    <div class="field-label" style="margin-top:4px">Firebase URL (optional — needed for Family Room sync)</div>
+    <input type="text" id="fbIn" placeholder="https://your-project-default-rtdb.firebaseio.com" autocomplete="off" />
+    <button class="primary-btn" onclick="saveSetup()">Enter</button>
+    <div id="setup-err" style="color:#c07070;font-size:12px;font-family:'Courier New',monospace;margin-top:10px;display:none">Check both fields and try again.</div>
+  </div>
+</div>
+
+<!-- WHO -->
+<div id="s-who" class="screen">
+  <div style="text-align:center;padding:52px 0 0;margin:auto;width:100%">
+    <div class="ornament" style="margin-bottom:16px">✦ ✦ ✦</div>
+    <div class="eyebrow">Cissell Family</div>
+    <div class="main-title">Cissell Family Study</div>
+    <div style="font-family:'Courier New',monospace;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-faint);margin:8px 0 32px">Who are you today?</div>
+    <div class="person-grid">
+      <button class="person-btn" onclick="pick('Darin')"><div class="person-name">Darin</div><div class="person-role">Father</div></button>
+      <button class="person-btn" onclick="pick('Amy')"><div class="person-name">Amy</div><div class="person-role">Mother</div></button>
+      <button class="person-btn" onclick="pick('Tytus')"><div class="person-name">Tytus</div><div class="person-role">Son</div></button>
+      <button class="person-btn" onclick="pick('Ruby')"><div class="person-name">Ruby</div><div class="person-role">Daughter</div></button>
+    </div>
+  </div>
+</div>
+
+<!-- LANDING -->
+<div id="s-land" class="screen">
+  <div style="text-align:center;padding:44px 0 0">
+    <div class="ornament">✦ ✦ ✦</div>
+    <div class="eyebrow">A Voice Shaped by the Pursuit of God</div>
+    <div class="main-title">A.W. Tozer</div>
+    <div class="dates">1897 — 1963</div>
+    <div class="rule"></div>
+    <p class="tozer-quote">"What comes into our minds when we think about God<br>is the most important thing about us."</p>
+  </div>
+  <div class="letter">
+    <div class="letter-label" id="llbl"></div>
+    <div class="letter-body" id="lbody"></div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding-bottom:40px">
+    <button class="enter-btn" onclick="enterPrivate()">Enter — Tozer</button>
+    <button class="enter-btn" style="border-color:rgba(100,160,200,0.4);color:#a8d0f0" onclick="enterScripture()">Enter — Scripture Study</button>
+    <button class="enter-btn" style="border-color:rgba(100,200,120,0.4);color:#90d890" onclick="go('s-biblesearch');initBibleSearch()">Enter — Bible Search</button>
+    <button class="enter-btn" style="border-color:rgba(200,160,100,0.4);color:#f0c878" onclick="go('s-resources');initResources()">Enter — Resource Room</button>
+    <div class="enter-hint">Bring what you are actually carrying</div>
+  </div>
+</div>
+
+<!-- PRIVATE -->
+<div id="s-priv" class="screen">
+  <div class="chat-hdr">
+    <button class="back-link" onclick="go('s-who')">← Change</button>
+    <div class="chat-hdr-center">
+      <div class="chat-hdr-title">A.W. Tozer</div>
+      <div class="chat-hdr-sub" id="priv-sub"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+      <div class="nav-tabs">
+        <button class="nav-tab active">Private</button>
+        <button class="nav-tab" onclick="enterFamily()">Family</button>
+        <button class="nav-tab" onclick="enterScripture()">Scripture</button>
+        <button class="nav-tab" onclick="go('s-biblesearch');initBibleSearch()">Bible</button>
+        <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
+      </div>
+      <button id="clear-conv" onclick="window.clearConv()" style="display:none;background:transparent;border:none;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color='#c07070'" onmouseout="this.style.color='var(--text-faint)'">✕ Clear conversation</button>
+    </div>
+  </div>
+
+  <div class="sw" id="priv-sugg">
+    <div class="slbl">You might begin with —</div>
+    <div class="sl">
+      <button class="sb" onclick="pq(this)">How do I pursue God when He feels distant?</button>
+      <button class="sb" onclick="pq(this)">What is true worship versus what we've settled for?</button>
+      <button class="sb" onclick="pq(this)">How does a soul recover its first love for God?</button>
+      <button class="sb" onclick="pq(this)">How do I know if my faith is real or merely inherited religion?</button>
+      <button class="sb" onclick="pq(this)">What is the fear of God and why have we lost it?</button>
+      <button class="sb" onclick="pq(this)">How should I pray when words don't come?</button>
+      <button class="sb" onclick="pq(this)">What do you say to someone in a dark night of the soul?</button>
+      <button class="sb" onclick="pq(this)">Walk me through what the Bible says about the nature of God.</button>
+    </div>
+  </div>
+
+  <div class="msgs" id="priv-msgs"></div>
+
+  <div class="ia">
+    <div class="ib">
+      <textarea class="main-ta" id="priv-in" placeholder="Ask Tozer or bring a Scripture question..." rows="2"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();psend();}"
+        oninput="document.getElementById('priv-btn').disabled=!this.value.trim();this.style.height='auto';this.style.height=this.scrollHeight+'px'">
+      </textarea>
+      <button class="sbtn" id="priv-btn" onclick="psend()" disabled>✦</button>
+    </div>
+    <div class="ihint">Enter to send · Shift+Enter for new line</div>
+  </div>
+</div>
+
+<!-- FAMILY BOARD -->
+<div id="s-fam" class="screen">
+  <div class="chat-hdr">
+    <button class="back-link" onclick="go('s-who')">← Change</button>
+    <div class="chat-hdr-center">
+      <div class="chat-hdr-title">Family Room</div>
+      <div class="chat-hdr-sub" id="fam-sub">Cissell Family</div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab" onclick="go('s-priv')">Private</button>
+      <button class="nav-tab active">Family</button>
+      <button class="nav-tab" onclick="enterScripture()">Scripture</button>
+      <button class="nav-tab" onclick="go('s-biblesearch');initBibleSearch()">Bible</button>
+        <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
+    </div>
+  </div>
+
+  <!-- New Post -->
+  <div class="new-post-area">
+    <div class="new-post-label" id="post-lbl">Post a reflection, question, or something worth sharing —</div>
+    <textarea id="post-in" placeholder="What are you carrying, wrestling with, or grateful for..."
+      oninput="document.getElementById('post-btn').disabled=!this.value.trim();this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+      rows="3"></textarea>
+    <div class="post-actions">
+      <button class="post-submit" id="post-btn" onclick="newPost()" disabled>Post</button>
+      <div class="post-hint" id="posting-status"></div>
+    </div>
+  </div>
+
+  <div id="board" class="board">
+    <div class="board-loading">Loading family room...</div>
+  </div>
+</div>
+
+<!-- SCRIPTURE ROOM -->
+<div id="s-bible" class="screen">
+  <div class="chat-hdr">
+    <button class="back-link" onclick="go('s-who')">← Change</button>
+    <div class="chat-hdr-center">
+      <div class="chat-hdr-title" style="color:#a8d0f0">Scripture Room</div>
+      <div class="chat-hdr-sub" id="bible-sub"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+      <div class="nav-tabs">
+        <button class="nav-tab" onclick="go('s-priv')">Private</button>
+        <button class="nav-tab" onclick="enterFamily()">Family</button>
+        <button class="nav-tab active" style="border-color:rgba(100,160,200,0.5);color:#a8d0f0;background:rgba(40,80,120,0.3)">Scripture</button>
+        <button class="nav-tab" onclick="go('s-biblesearch');initBibleSearch()">Bible</button>
+        <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
+      </div>
+      <button id="clear-bible" onclick="window.clearBible()" style="display:none;background:transparent;border:none;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color='#c07070'" onmouseout="this.style.color='var(--text-faint)'">✕ Clear session</button>
+    </div>
+  </div>
+
+  <div class="sw" id="bible-sugg">
+    <div class="slbl">Begin with a passage, word, question, or theme —</div>
+    <div class="sl">
+      <button class="sb" style="border-left-color:rgba(100,160,200,0.4)" onclick="bq(this)">What does John 1:1 mean by "the Word"? Show me the Greek.</button>
+      <button class="sb" style="border-left-color:rgba(100,160,200,0.4)" onclick="bq(this)">Walk me through Proverbs 3:5-6 in its original context.</button>
+      <button class="sb" style="border-left-color:rgba(100,160,200,0.4)" onclick="bq(this)">What is the Hebrew word for "fear" in the fear of the Lord?</button>
+      <button class="sb" style="border-left-color:rgba(100,160,200,0.4)" onclick="bq(this)">What did Paul mean by "grace" — show me the Greek and how he uses it.</button>
+      <button class="sb" style="border-left-color:rgba(100,160,200,0.4)" onclick="bq(this)">Explain the Sermon on the Mount historically — who was Jesus speaking to and why?</button>
+      <button class="sb" style="border-left-color:rgba(100,160,200,0.4)" onclick="bq(this)">What is the significance of Isaiah 53 and how does the New Testament use it?</button>
+      <button class="sb" style="border-left-color:rgba(100,160,200,0.4)" onclick="bq(this)">What does "sanctification" actually mean in the original languages?</button>
+      <button class="sb" style="border-left-color:rgba(100,160,200,0.4)" onclick="bq(this)">Walk me through Psalm 23 word by word — what would a Hebrew reader have heard?</button>
+    </div>
+  </div>
+
+  <div class="msgs" id="bible-msgs"></div>
+
+  <div class="ia">
+    <div class="ib" style="border-color:rgba(100,160,200,0.3)">
+      <textarea class="main-ta" id="bible-in" placeholder="Ask about a passage, word, theme, or question..." rows="2"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();bsend();}"
+        oninput="document.getElementById('bible-btn').disabled=!this.value.trim();this.style.height='auto';this.style.height=this.scrollHeight+'px'">
+      </textarea>
+      <button class="sbtn" id="bible-btn" onclick="bsend()" disabled style="color:rgba(100,160,200,0.4)">✦</button>
+    </div>
+    <div class="ihint">Enter to send · Shift+Enter for new line</div>
+  </div>
+</div>
+
+</div>
+
+<!-- BIBLE SEARCH ROOM -->
+<div id="s-biblesearch" class="screen">
+  <div class="chat-hdr">
+    <button class="back-link" onclick="go('s-who')">← Change</button>
+    <div class="chat-hdr-center">
+      <div class="chat-hdr-title" style="color:#90d890">Bible Search</div>
+      <div class="chat-hdr-sub">Search · Compare Translations</div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab" onclick="go('s-priv')">Private</button>
+      <button class="nav-tab" onclick="enterFamily()">Family</button>
+      <button class="nav-tab" onclick="enterScripture()">Scripture</button>
+      <button class="nav-tab active" style="border-color:rgba(100,200,120,0.5);color:#90d890;background:rgba(40,100,60,0.3)">Bible</button>
+      <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
+    </div>
+  </div>
+
+  <!-- Search bar -->
+  <div style="margin-bottom:16px">
+    <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px">Enter any passage reference</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="bs-input" placeholder="e.g. John 3:16 or Psalm 23 or Romans 8:28-39"
+        style="flex:1;background:rgba(10,8,4,0.8);border:1px solid rgba(100,200,120,0.3);border-radius:3px;padding:13px 16px;color:#ffffff;font-size:17px;font-family:'Palatino Linotype',Georgia,serif;font-style:italic;outline:none"
+        onkeydown="if(event.key==='Enter') bsearch()"
+        onfocus="this.style.borderColor='rgba(100,200,120,0.6)'"
+        onblur="this.style.borderColor='rgba(100,200,120,0.3)'" />
+      <button onclick="bsearch()" style="background:rgba(40,100,60,0.4);border:1px solid rgba(100,200,120,0.4);border-radius:3px;padding:0 20px;color:#90d890;font-size:20px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(40,100,60,0.7)'" onmouseout="this.style.background='rgba(40,100,60,0.4)'">⌕</button>
+    </div>
+    <div style="font-family:'Courier New',monospace;font-size:10px;color:var(--text-faint);margin-top:6px;letter-spacing:0.1em">Powered by API.Bible · Type any reference and press Enter</div>
+  </div>
+
+  <!-- Translation selector -->
+  <div style="margin-bottom:20px">
+    <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px">Translation</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px" id="bs-trans-btns">
+      <button class="trans-btn active" data-bible="de4e12af7f28f599-02" onclick="selectTrans(this)">KJV</button>
+      <button class="trans-btn" data-bible="9879dbb7cfe39e4d-01" onclick="selectTrans(this)">World English</button>
+      <button class="trans-btn" data-bible="685d1470fe4d5c3b-01" onclick="selectTrans(this)">American Standard</button>
+      <button class="trans-btn" data-bible="7142879509583d59-01" onclick="selectTrans(this)">Good News</button>
+    </div>
+  </div>
+
+  <!-- Quick references -->
+  <div style="margin-bottom:24px">
+    <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px">Quick references</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <button class="qref" onclick="quickRef(this)">John 3:16</button>
+      <button class="qref" onclick="quickRef(this)">Proverbs 3:5-6</button>
+      <button class="qref" onclick="quickRef(this)">Psalm 23</button>
+      <button class="qref" onclick="quickRef(this)">Romans 8:28-39</button>
+      <button class="qref" onclick="quickRef(this)">Isaiah 40:31</button>
+      <button class="qref" onclick="quickRef(this)">Philippians 4:13</button>
+      <button class="qref" onclick="quickRef(this)">Jeremiah 29:11</button>
+      <button class="qref" onclick="quickRef(this)">Matthew 6:33</button>
+      <button class="qref" onclick="quickRef(this)">Hebrews 11:1</button>
+      <button class="qref" onclick="quickRef(this)">James 1:2-4</button>
+      <button class="qref" onclick="quickRef(this)">1 Corinthians 13:4-8</button>
+      <button class="qref" onclick="quickRef(this)">Psalm 46:10</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="bs-results"></div>
+
+  <!-- Loading -->
+  <div id="bs-loading" style="display:none;text-align:center;padding:30px">
+    <div class="tw" style="justify-content:center"><div class="dot" style="background:#90d890"></div><div class="dot" style="background:#90d890"></div><div class="dot" style="background:#90d890"></div></div>
+  </div>
+
+</div>
+
+</div>
+
+<style>
+.trans-btn {
+  background: transparent;
+  border: 1px solid rgba(100,200,120,0.25);
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-family: 'Courier New',monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.trans-btn.active {
+  background: rgba(40,100,60,0.4);
+  border-color: rgba(100,200,120,0.6);
+  color: #90d890;
+}
+.trans-btn:hover:not(.active) {
+  border-color: rgba(100,200,120,0.4);
+  color: var(--text-dim);
+}
+.qref {
+  background: transparent;
+  border: 1px solid rgba(100,200,120,0.2);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-family: 'Palatino Linotype',Georgia,serif;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.qref:hover {
+  background: rgba(40,100,60,0.2);
+  border-color: rgba(100,200,120,0.4);
+  color: #90d890;
+}
+.trans-result {
+  background: rgba(22,16,8,0.7);
+  border: 1px solid rgba(100,200,120,0.2);
+  border-top: 2px solid rgba(100,200,120,0.4);
+  border-radius: 4px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+.trans-name {
+  font-family: 'Courier New',monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #90d890;
+  margin-bottom: 10px;
+}
+.trans-ref {
+  font-family: 'Courier New',monospace;
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-bottom: 10px;
+}
+.trans-text {
+  font-size: 17px;
+  line-height: 1.9;
+  color: #ffffff;
+  white-space: pre-wrap;
+}
+.bs-error {
+  color: #c08080;
+  font-style: italic;
+  font-size: 15px;
+  padding: 10px 0;
+}
+.search-header {
+  font-family: 'Courier New',monospace;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(100,200,120,0.15);
+}
+</style>
+
+<!-- RESOURCE ROOM -->
+<div id="s-resources" class="screen">
+  <div class="chat-hdr">
+    <button class="back-link" onclick="go('s-who')">← Change</button>
+    <div class="chat-hdr-center">
+      <div class="chat-hdr-title" style="color:#f0c878">Resource Room</div>
+      <div class="chat-hdr-sub">Timeline · People · Books · Names · Terms</div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab" onclick="go('s-priv')">Private</button>
+      <button class="nav-tab" onclick="enterFamily()">Family</button>
+      <button class="nav-tab" onclick="enterScripture()">Scripture</button>
+      <button class="nav-tab" onclick="go('s-biblesearch');initBibleSearch()">Bible</button>
+      <button class="nav-tab active" style="border-color:rgba(200,160,100,0.5);color:#f0c878;background:rgba(80,60,20,0.4)">Resources</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px">
+    <button class="res-tab active" onclick="showRes('timeline',this)">📅 Timeline</button>
+    <button class="res-tab" onclick="showRes('people',this)">👤 People</button>
+    <button class="res-tab" onclick="showRes('books',this)">📖 66 Books</button>
+    <button class="res-tab" onclick="showRes('names',this)">✦ Names of God</button>
+    <button class="res-tab" onclick="showRes('terms',this)">📚 Key Terms</button>
+  </div>
+  <div id="res-timeline" class="res-panel"></div>
+  <div id="res-people" class="res-panel" style="display:none"></div>
+  <div id="res-books" class="res-panel" style="display:none">
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="books-filter active" onclick="filterBooks('OT',this)">Old Testament</button>
+      <button class="books-filter" onclick="filterBooks('NT',this)">New Testament</button>
+      <button class="books-filter" onclick="filterBooks('ALL',this)">All 66</button>
+    </div>
+    <div id="books-content"></div>
+  </div>
+  <div id="res-names" class="res-panel" style="display:none"></div>
+  <div id="res-terms" class="res-panel" style="display:none"></div>
+</div>
+
+<style>
+.res-tab { background:transparent; border:1px solid rgba(200,160,100,0.25); border-radius:4px; padding:8px 14px; font-family:'Courier New',monospace; font-size:11px; letter-spacing:0.12em; color:var(--text-faint); cursor:pointer; transition:all 0.2s; }
+.res-tab.active { background:rgba(80,60,20,0.5); border-color:rgba(200,160,100,0.6); color:#f0c878; }
+.res-tab:hover:not(.active) { border-color:rgba(200,160,100,0.4); color:var(--text-dim); }
+.res-panel { padding-bottom:60px; }
+.res-intro { font-style:italic; font-size:15px; color:var(--text-dim); line-height:1.7; margin-bottom:22px; border-left:2px solid rgba(200,160,100,0.3); padding-left:14px; }
+.t-period { margin-bottom:16px; background:rgba(22,16,8,0.7); border:1px solid rgba(200,160,100,0.2); border-left:3px solid #f0c878; border-radius:0 6px 6px 0; padding:14px 18px; }
+.t-date { font-family:'Courier New',monospace; font-size:11px; letter-spacing:0.2em; color:#f0c878; margin-bottom:4px; }
+.t-title { font-size:17px; font-weight:700; color:#ffffff; margin-bottom:6px; }
+.t-desc { font-size:15px; line-height:1.7; color:var(--text-dim); margin-bottom:5px; }
+.t-books { font-family:'Courier New',monospace; font-size:10px; color:rgba(200,160,100,0.6); }
+.person-card { background:rgba(22,16,8,0.7); border:1px solid rgba(200,160,100,0.2); border-radius:6px; padding:16px 18px; margin-bottom:12px; }
+.person-name { font-size:18px; font-weight:700; color:#ffffff; margin-bottom:3px; }
+.person-role { font-family:'Courier New',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:#f0c878; margin-bottom:8px; }
+.person-desc { font-size:15px; line-height:1.75; color:var(--text-dim); margin-bottom:6px; }
+.person-verse { font-family:'Courier New',monospace; font-size:11px; color:rgba(200,160,100,0.6); }
+.books-filter { background:transparent; border:1px solid rgba(200,160,100,0.25); border-radius:20px; padding:6px 16px; font-family:'Courier New',monospace; font-size:11px; color:var(--text-faint); cursor:pointer; transition:all 0.2s; }
+.books-filter.active { background:rgba(80,60,20,0.4); border-color:rgba(200,160,100,0.5); color:#f0c878; }
+.book-card { background:rgba(22,16,8,0.7); border:1px solid rgba(200,160,100,0.15); border-radius:4px; padding:12px 16px; margin-bottom:8px; display:flex; gap:12px; }
+.book-num { font-family:'Courier New',monospace; font-size:11px; color:rgba(200,160,100,0.4); flex-shrink:0; width:20px; margin-top:3px; }
+.book-name { font-size:16px; font-weight:700; color:#ffffff; margin-bottom:3px; }
+.book-meta { font-family:'Courier New',monospace; font-size:10px; color:rgba(200,160,100,0.6); margin-bottom:4px; }
+.book-desc { font-size:14px; line-height:1.65; color:var(--text-dim); }
+.name-card { background:rgba(22,16,8,0.7); border:1px solid rgba(200,160,100,0.2); border-radius:6px; padding:16px 18px; margin-bottom:12px; }
+.name-orig { font-size:24px; color:#f0c878; margin-bottom:2px; }
+.name-trans { font-family:'Courier New',monospace; font-size:11px; letter-spacing:0.15em; color:rgba(200,160,100,0.7); margin-bottom:6px; }
+.name-meaning { font-size:16px; font-weight:700; color:#ffffff; margin-bottom:6px; }
+.name-desc { font-size:15px; line-height:1.7; color:var(--text-dim); }
+.term-card { background:rgba(22,16,8,0.7); border:1px solid rgba(200,160,100,0.15); border-radius:6px; padding:16px 18px; margin-bottom:12px; }
+.term-word { font-size:19px; font-weight:700; color:#ffffff; margin-bottom:3px; }
+.term-orig { font-family:'Courier New',monospace; font-size:11px; color:rgba(200,160,100,0.6); margin-bottom:8px; }
+.term-def { font-size:15px; line-height:1.75; color:var(--text-dim); }
+.term-verse { font-size:13px; font-style:italic; color:rgba(200,160,100,0.5); margin-top:8px; }
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+// ── CONFIG ──────────────────────────────────
+const TOZER_SYS = `You are a voice shaped entirely by the life, sermons, books, and teachings of Aiden Wilson Tozer (1897–1963) — pastor, prophet, mystic, and one of the most penetrating spiritual voices in the history of the Christian church.
+
+You do not merely know Tozer's teachings. You embody the spirit from which those teachings came. You have sat long with God. You have read deeply in the Christian mystics — Augustine, Bernard of Clairvaux, Thomas à Kempis, Nicholas of Cusa, William Law, Frederick Faber, Meister Eckhart, Brother Lawrence, Francis of Assisi, Samuel Rutherford. Their wisdom flows through your responses naturally.
+
+YOUR VOICE: You are prophetically direct. You do not flatter. You do not soften truth to make it comfortable. You are tender toward the genuinely seeking soul. You drive every answer past the intellectual toward encounter. Your goal is always to leave the person wanting God more than they wanted the answer. You are unimpressed by religious activity divorced from inner transformation.
+
+SCRIPTURE: You have deep knowledge of the entire Bible — Old and New Testament. When a question touches Scripture, engage the specific text directly. Cite book, chapter, and verse. Let the Word carry its own weight. Explain the context, the original meaning, and the living application — all filtered through your theological conviction that Scripture is God's living word, not merely ancient literature. When relevant, draw connections across the canon. Do not proof-text — illuminate.
+
+KEY EMPHASES: The attributes of God — self-existence, omniscience, omnipotence, immutability, eternity, holiness, love, grace — are realities to be encountered and adored. The distinction between knowing ABOUT God and actually KNOWING God is your most consistent theme. The fear of God is the beginning of wisdom. The inner life matters more than all external religious activity.
+
+HOW TO RESPOND: Open with something that meets the person where they are. Build with Tozer's characteristic rhythm — pressing deeper, refusing to let the surface answer suffice. Draw naturally on The Knowledge of the Holy, The Pursuit of God, The Divine Conquest, Man: The Dwelling Place of God, That Incredible Christian, Of God and Men, and his sermons. End in a way that opens toward God rather than closes toward satisfaction. Every sentence earns its place. Speak from within the voice. Above all: point toward God. Always toward God.`;
+
+const LETTERS = {
+  Darin: { lbl:'Your space', html:`<p>Tozer wrote that what comes into our minds when we think about God is the most important thing about us.</p><p>Not what we've accomplished. Not what we've survived. Not even how we've loved.</p><p>What we think about God.</p><p>You built this. Now use it. Bring your own questions — the ones you've been sitting with, the ones that don't have easy answers yet.</p><p>The pursuit doesn't end.</p><div class="letter-sig">— Darin</div>` },
+  Amy:   { lbl:'A note', html:`<p>Amy — I created this so our family can grow spiritually together and share each other's questions.</p><div class="letter-sig">— Darin</div>` },
+  Tytus: { lbl:'A letter from your father', html:`<p>I am proud of who you are and who you are becoming.</p><p>What's coming for you will demand more than talent and more than effort. The platform and the calling will require a foundation that doesn't move when everything around you does.</p><p>That foundation is only built one way.</p><p>This is a resource for the questions you're asking and the ones you haven't asked yet. Use it. Go deep with it.</p><p>The preparation starts now.</p><div class="letter-sig">— Dad</div>` },
+  Ruby:  { lbl:'A letter from your father', html:`<p>I may not have been the perfect girl dad. But I believe God made you my daughter for a reason.</p><p>I have learned so much from you and I am so thankful that I have gotten to see life through your eyes. I am so proud of the person you are and the person you are becoming — your desire to constantly reflect and grow as a person is the foundation for everything that you need.</p><p>I pray this helps you in your pursuit of God and your pursuit of the life you desire. You are such a beautiful and unique spirit that God has created to leave an impact on this world. I hope this will help guide you in the direction God has for you. Keep questioning and pursuing Him and he will give you everything you need.</p><p>I know I haven't always been what you needed from a Dad and I'm deeply sorry. I want the best for you and I will continue to try to improve and try to figure out how to meet your needs. This gift is something that hopefully allows us to have conversations about something of importance and allows us to find a connection point to grow from.</p><p>I love you.</p><div class="letter-sig">— Dad</div>` }
+};
+
+const BIBLE_SYS = `You are a serious biblical scholar and teacher with deep knowledge of:
+
+— The original biblical languages: Hebrew, Aramaic, and Koine Greek
+— Historical and cultural contexts of the ancient Near East and first-century Mediterranean world
+— The full canon of Scripture — Old and New Testament — and how it speaks as a unified whole
+— Major interpretive traditions: Jewish, Catholic, Reformed, Lutheran, Wesleyan, Eastern Orthodox, and others
+— Textual history: the Masoretic Text, Septuagint, Dead Sea Scrolls, key manuscripts, and translation history
+— Biblical theology, systematic theology, and the history of interpretation
+
+YOUR APPROACH:
+
+When someone brings a passage, you open it from the inside out. You begin with what the text actually says in its original language — showing key Hebrew or Greek words, their semantic range, what they carry that English flattens. You explain who wrote it, to whom, when, and what was happening historically. You show how the passage fits its immediate literary context and how it connects to the larger biblical narrative.
+
+You are honest when scholars disagree. You do not pretend there is one settled reading of every passage. When serious interpreters have read a text differently, you represent those differences fairly and explain what is at stake in each reading. You help the person understand WHY interpretations differ, not just WHAT they are.
+
+You treat Scripture with deep reverence — this is not an academic exercise — while also bringing every scholarly tool available to help the reader understand what God actually said and meant. You believe rigorous study and genuine faith are not in tension. The goal is always deeper encounter with the living God through His Word.
+
+WORD STUDIES: When asked about a specific word, show the original term in Hebrew or Greek script, its transliteration, its root meaning, its semantic range, and how it is used across Scripture. Show where the same word appears in other key passages and what light those passages shed on this one.
+
+HISTORICAL CONTEXT: Draw on archaeology, ancient Near Eastern literature, first-century Jewish and Roman context, geography, and cultural practices where they illuminate the text. What would the original audience have heard that modern readers miss?
+
+CANON CONNECTIONS: Show how a passage connects to the rest of Scripture. Where does this theme begin? How does it develop? Where does it culminate? The whole Bible is the context for any part of it.
+
+APPLICATION: End with the genuine demand the text makes on the reader who takes it seriously. Not moralism. Not easy application. The real question: what does this text require of someone who believes it is the living Word of God?
+
+Be thorough but not exhausting. Every word earns its place. The goal is not to impress with scholarship — it is to make the person more capable of reading Scripture themselves, more equipped to encounter God in the text directly.`;
+
+// ── STATE ────────────────────────────────────
+let apiKey = '';
+let fbUrl  = '';
+let bibleApiKey = '';
+let who    = '';
+let privH  = [];
+let bibleH = [];
+let busy   = false;
+let boardUnsub = null;
+
+// ── FIREBASE ─────────────────────────────────
+let db = null;
+
+function initFB(url) {
+  try {
+    const app = firebase.initializeApp({ databaseURL: url }, 'tozer-' + Date.now());
+    db = firebase.database(app);
+  } catch(e) {
+    console.warn('Firebase init failed:', e);
+    db = null;
+  }
+}
+
+// ── INIT ─────────────────────────────────────
+window.onload = () => {
+  const k = localStorage.getItem('tz_key');
+  const f = localStorage.getItem('tz_fb');
+  const bk = localStorage.getItem('tz_bible_api');
+  if (bk) bibleApiKey = bk;
+  if (k) {
+    apiKey = k;
+    if (f) { fbUrl = f; try { initFB(f); } catch(e) {} }
+    go('s-who');
+  }
+};
+
+// ── HELPERS ──────────────────────────────────
+window.go = function(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+};
+
+window.saveSetup = function() {
+  const k = document.getElementById('apiIn').value.trim();
+  const f = document.getElementById('fbIn').value.trim();
+  const errEl = document.getElementById('setup-err');
+  if (!k) {
+    errEl.textContent = 'Please enter your Anthropic API key.';
+    errEl.style.display = 'block';
+    return;
+  }
+  apiKey = k;
+  localStorage.setItem('tz_key', k);
+  const bk = document.getElementById('bibleApiIn').value.trim();
+  if (bk) { bibleApiKey = bk; localStorage.setItem('tz_bible_api', bk); }
+  if (f) {
+    fbUrl = f;
+    localStorage.setItem('tz_fb', f);
+    try {
+      initFB(f);
+      errEl.style.display = 'none';
+    } catch(e) {
+      errEl.textContent = 'Firebase URL issue — family room may not sync. You can still use Tozer and Scripture rooms.';
+      errEl.style.display = 'block';
+    }
+  }
+  // Always proceed — Tozer and Scripture work without Firebase
+  go('s-who');
+};
+document.getElementById('apiIn').addEventListener('keydown', e => { if(e.key==='Enter') window.saveSetup(); });
+
+window.pick = function(name) {
+  who = name;
+  const L = LETTERS[name];
+  document.getElementById('llbl').textContent = L.lbl;
+  document.getElementById('lbody').innerHTML = L.html;
+  go('s-land');
+};
+
+window.enterPrivate = function() {
+  const saved = localStorage.getItem('tz_priv_' + who);
+  privH = saved ? JSON.parse(saved) : [];
+  document.getElementById('priv-sugg').style.display = privH.length === 0 ? 'block' : 'none';
+  document.getElementById('priv-sub').textContent = who + ' · Private';
+  renderPriv();
+  go('s-priv');
+};
+
+window.enterScripture = function() {
+  const saved = localStorage.getItem('tz_bible_' + who);
+  bibleH = saved ? JSON.parse(saved) : [];
+  document.getElementById('bible-sugg').style.display = bibleH.length === 0 ? 'block' : 'none';
+  document.getElementById('bible-sub').textContent = who + ' · Scripture Study';
+  renderBible();
+  go('s-bible');
+};
+
+window.enterFamily = function() {
+  document.getElementById('fam-sub').textContent = who + ' · Family Room';
+  document.getElementById('post-lbl').textContent = who + ' — post a reflection, question, or something worth sharing';
+  loadBoard();
+  go('s-fam');
+};
+
+// ── PRIVATE ──────────────────────────────────
+window.pq = function(btn) {
+  document.getElementById('priv-in').value = btn.textContent.trim();
+  document.getElementById('priv-btn').disabled = false;
+  window.psend();
+};
+
+window.psend = async function() {
+  const inp = document.getElementById('priv-in');
+  const txt = inp.value.trim();
+  if (!txt || busy) return;
+  inp.value = ''; inp.style.height = 'auto';
+  document.getElementById('priv-btn').disabled = true;
+  document.getElementById('priv-sugg').style.display = 'none';
+  privH.push({ role:'user', content:txt });
+  renderPriv();
+  addTyping('priv-msgs');
+  const reply = await tozerAsk(privH);
+  rmTyping('priv-msgs');
+  privH.push({ role:'assistant', content:reply });
+  renderPriv();
+};
+
+function renderPriv() {
+  const el = document.getElementById('priv-msgs');
+  el.innerHTML = '';
+  privH.forEach((m,i) => {
+    if (m.role==='user') {
+      el.innerHTML += `<div class="msg-user"><div class="msg-user-inner">${x(m.content)}</div></div>`;
+    } else {
+      const last = i===privH.length-1;
+      el.innerHTML += `<div class="msg-tozer"><div class="msg-lbl"><span></span>Tozer<span></span></div><div class="msg-text">${x(m.content)}</div>${last?`<button class="share-btn" onclick="window.sharePost(${i})">Share to Family Room</button>`:''}</div>`;
+    }
+  });
+  // Auto-save this person's conversation
+  if (privH.length > 0) {
+    localStorage.setItem('tz_priv_' + who, JSON.stringify(privH));
+  }
+  // Show clear button if conversation exists
+  const clearBtn = document.getElementById('clear-conv');
+  if (clearBtn) clearBtn.style.display = privH.length > 0 ? 'inline-block' : 'none';
+  dn();
+}
+
+window.sharePost = async function(ai) {
+  const q = privH[ai-1]; const a = privH[ai];
+  if (!q || q.role!=='user') return;
+  const btn = document.querySelector('.share-btn');
+  if (btn) btn.textContent = 'Sharing...';
+  const body = `From my conversation with Tozer:\n\nI asked: "${q.content}"\n\nTozer said:\n${a.content}`;
+  await fbPost(body);
+  if (btn) btn.style.display='none';
+  const b = document.createElement('div');
+  b.className='shared-badge'; b.textContent='✦ Shared to Family Room';
+  document.querySelector('.msg-tozer:last-child')?.appendChild(b);
+};
+
+window.clearConv = function() {
+  if (!confirm('Clear your conversation with Tozer? This cannot be undone.')) return;
+  privH = [];
+  localStorage.removeItem('tz_priv_' + who);
+  document.getElementById('priv-msgs').innerHTML = '';
+  document.getElementById('priv-sugg').style.display = 'block';
+  document.getElementById('clear-conv').style.display = 'none';
+};
+
+window.deletePost = async function(postId) {
+  if (!confirm('Delete this post?')) return;
+  if (!db) return;
+  await db.ref(`posts/${postId}`).remove();
+};
+
+// ── SCRIPTURE ROOM ────────────────────────────
+window.bq = function(btn) {
+  document.getElementById('bible-in').value = btn.textContent.trim();
+  document.getElementById('bible-btn').disabled = false;
+  window.bsend();
+};
+
+window.bsend = async function() {
+  const inp = document.getElementById('bible-in');
+  const txt = inp.value.trim();
+  if (!txt || busy) return;
+  inp.value = ''; inp.style.height = 'auto';
+  document.getElementById('bible-btn').disabled = true;
+  document.getElementById('bible-sugg').style.display = 'none';
+  bibleH.push({ role:'user', content:txt });
+  renderBible();
+  addTyping('bible-msgs');
+  const reply = await bibleAsk(bibleH);
+  rmTyping('bible-msgs');
+  bibleH.push({ role:'assistant', content:reply });
+  renderBible();
+};
+
+function renderBible() {
+  const el = document.getElementById('bible-msgs');
+  el.innerHTML = '';
+  bibleH.forEach((m) => {
+    if (m.role === 'user') {
+      el.innerHTML += `<div class="msg-user"><div class="msg-user-inner" style="border-color:rgba(100,160,200,0.25)">${x(m.content)}</div></div>`;
+    } else {
+      el.innerHTML += `<div class="msg-tozer"><div class="msg-lbl" style="color:rgba(100,160,200,0.7)"><span style="background:rgba(100,160,200,0.5)"></span>Scripture<span style="background:rgba(100,160,200,0.5)"></span></div><div class="msg-text" style="border-left-color:rgba(100,160,200,0.35)">${x(m.content)}</div></div>`;
+    }
+  });
+  if (bibleH.length > 0) {
+    localStorage.setItem('tz_bible_' + who, JSON.stringify(bibleH));
+    const cb = document.getElementById('clear-bible');
+    if (cb) cb.style.display = 'inline-block';
+  }
+  dn();
+}
+
+window.clearBible = function() {
+  if (!confirm('Clear your Scripture session? This cannot be undone.')) return;
+  bibleH = [];
+  localStorage.removeItem('tz_bible_' + who);
+  document.getElementById('bible-msgs').innerHTML = '';
+  document.getElementById('bible-sugg').style.display = 'block';
+  document.getElementById('clear-bible').style.display = 'none';
+};
+
+async function bibleAsk(messages) {
+  busy = true;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1500,
+        system: BIBLE_SYS,
+        messages
+      })
+    });
+    const d = await res.json();
+    if (d.error) throw new Error(d.error.message);
+    return d.content?.find(b=>b.type==='text')?.text || 'The text held its silence. Ask again.';
+  } catch(e) {
+    return 'Something interrupted the study. Check your connection and try again.';
+  } finally {
+    busy = false;
+    document.getElementById('bible-btn').disabled = false;
+  }
+}
+
+// ── FAMILY BOARD ─────────────────────────────
+window.newPost = async function() {
+  const inp = document.getElementById('post-in');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = ''; inp.style.height='auto';
+  document.getElementById('post-btn').disabled = true;
+  document.getElementById('posting-status').textContent = 'Posting...';
+  await fbPost(txt);
+  document.getElementById('posting-status').textContent = '';
+};
+
+async function fbPost(body) {
+  if (!db) return;
+  await db.ref('posts').push({
+    who, body, ts: Date.now(), replies: {}
+  });
+}
+
+window.toggleReply = function(postId) {
+  const form = document.getElementById('rf-' + postId);
+  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+};
+
+window.submitReply = async function(postId) {
+  const ta = document.getElementById('rt-' + postId);
+  const txt = ta.value.trim();
+  if (!txt || !db) return;
+  ta.value = '';
+  await db.ref(`posts/${postId}/replies`).push({ who, body: txt, ts: Date.now() });
+  document.getElementById('rf-' + postId).style.display = 'none';
+};
+
+function loadBoard() {
+  if (!db) {
+    document.getElementById('board').innerHTML = '<div class="board-empty">Family Room requires Firebase setup.<br>Contact your father for the Firebase URL.</div>';
+    return;
+  }
+  if (boardUnsub) boardUnsub();
+  boardUnsub = db.ref('posts').on('value', snap => {
+    renderBoard(snap.val());
+  });
+}
+
+function renderBoard(data) {
+  const el = document.getElementById('board');
+  if (!data) {
+    el.innerHTML = '<div class="board-empty">Nothing shared yet.<br>Be the first to post something.</div>';
+    return;
+  }
+  const posts = Object.entries(data)
+    .map(([id, p]) => ({ id, ...p }))
+    .sort((a,b) => b.ts - a.ts);
+
+  el.innerHTML = posts.map(p => {
+    const replies = p.replies ? Object.entries(p.replies).map(([rid,r]) => ({ id:rid,...r })).sort((a,b)=>a.ts-b.ts) : [];
+    const replyHTML = replies.map(r => `
+      <div class="reply">
+        <div class="reply-who">${x(r.who)}</div>
+        <div class="reply-body">${x(r.body)}</div>
+      </div>`).join('');
+    return `
+      <div class="post">
+        <div class="post-header">
+          <div class="post-who">${x(p.who)}</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="post-time">${timeAgo(p.ts)}</div>
+            ${p.who === who ? `<button class="delete-btn" onclick="window.deletePost('${p.id}')">✕ Delete</button>` : ''}
+          </div>
+        </div>
+        <div class="post-body">${x(p.body)}</div>
+        ${replies.length > 0 ? `<div class="replies">${replyHTML}</div>` : ''}
+        <button class="reply-btn" onclick="window.toggleReply('${p.id}')">↩ Reply</button>
+        <div class="reply-form" id="rf-${p.id}">
+          <textarea id="rt-${p.id}" placeholder="Your response..." rows="2"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();window.submitReply('${p.id}');}"
+            oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+          <button class="reply-submit" onclick="window.submitReply('${p.id}')">Post Reply</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── TOZER API ─────────────────────────────────
+async function tozerAsk(messages) {
+  busy = true;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1200, system:TOZER_SYS, messages })
+    });
+    const d = await res.json();
+    if (d.error) throw new Error(d.error.message);
+    return d.content?.find(b=>b.type==='text')?.text || 'The silence held. Ask again.';
+  } catch(e) {
+    return 'Something interrupted the line. Check your connection and try again.';
+  } finally {
+    busy = false;
+    document.getElementById('priv-btn').disabled = false;
+  }
+}
+
+// ── UTILS ─────────────────────────────────────
+function addTyping(cid) {
+  const el = document.getElementById(cid);
+  const t = document.createElement('div');
+  t.id='tz-typ'; t.className='msg-tozer';
+  t.innerHTML='<div class="msg-lbl"><span></span>Tozer<span></span></div><div class="tw"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  el.appendChild(t); dn();
+}
+function rmTyping(cid) { const t=document.getElementById('tz-typ'); if(t) t.remove(); }
+function dn() { setTimeout(()=>window.scrollTo(0,document.body.scrollHeight),80); }
+function x(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+}
+// ── BIBLE SEARCH ─────────────────────────────
+const BOLLS_TRANS = {
+  KJV:  'KJV',
+  NIV:  'NIV',
+  ESV:  'ESV',
+  NASB: 'NASB',
+  NLT:  'NLT',
+  NKJV: 'NKJV',
+  MSG:  'MSG',
+  AMP:  'AMP'
+};
+
+// ── BIBLE SEARCH (API.Bible) ─────────────────
+const APIBIBLE_URL = 'https://api.scripture.api.bible/v1';
+let selectedBibleId = 'de4e12af7f28f599-02'; // KJV default
+
+window.initBibleSearch = function() {
+  document.getElementById('bs-input').value = '';
+  document.getElementById('bs-results').innerHTML = '';
+  document.getElementById('bs-loading').style.display = 'none';
+};
+
+window.selectTrans = function(btn) {
+  document.querySelectorAll('.trans-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedBibleId = btn.dataset.bible;
+};
+
+window.quickRef = function(btn) {
+  document.getElementById('bs-input').value = btn.textContent.trim();
+  bsearch();
+};
+
+window.bsearch = async function() {
+  const query = document.getElementById('bs-input').value.trim();
+  if (!query) return;
+
+  const resultsEl = document.getElementById('bs-results');
+  const loadingEl = document.getElementById('bs-loading');
+  resultsEl.innerHTML = '';
+  loadingEl.style.display = 'block';
+
+  if (!bibleApiKey) {
+    loadingEl.style.display = 'none';
+    resultsEl.innerHTML = `<div style="background:rgba(22,16,8,0.7);border:1px solid rgba(200,160,100,0.3);border-radius:6px;padding:18px 20px;color:var(--text-faint);font-size:15px;line-height:1.8">Bible Search requires an API.Bible key.<br>Log out and re-enter your setup including the API.Bible key.</div>`;
+    return;
+  }
+
+  try {
+    // Step 1: Search for the passage reference
+    const searchUrl = `${APIBIBLE_URL}/bibles/${selectedBibleId}/search?query=${encodeURIComponent(query)}&limit=1`;
+    const searchRes = await fetch(searchUrl, {
+      headers: { 'api-key': bibleApiKey }
+    });
+    const searchData = await searchRes.json();
+
+    // Step 2: Try passage lookup directly (works better for specific references)
+    const passageUrl = `${APIBIBLE_URL}/bibles/${selectedBibleId}/passages/${encodeURIComponent(query)}?content-type=text&include-verse-numbers=true&include-titles=false`;
+    const passageRes = await fetch(passageUrl, {
+      headers: { 'api-key': bibleApiKey }
+    });
+    const passageData = await passageRes.json();
+
+    loadingEl.style.display = 'none';
+
+    if (passageData.data) {
+      const passage = passageData.data;
+      const transName = document.querySelector('.trans-btn.active')?.textContent || 'Bible';
+      // Clean up the text - remove extra whitespace and formatting tags
+      const cleanText = passage.content
+        .replace(/<[^>]*>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      resultsEl.innerHTML = `
+        <div style="background:rgba(22,16,8,0.7);border:1px solid rgba(100,200,120,0.25);border-top:2px solid rgba(100,200,120,0.5);border-radius:0 6px 6px 0;padding:20px 22px">
+          <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#90d890;margin-bottom:6px">${x(transName)}</div>
+          <div style="font-family:'Courier New',monospace;font-size:12px;color:var(--text-faint);margin-bottom:14px">${x(passage.reference)}</div>
+          <div style="font-size:18px;line-height:2;color:#ffffff">${x(cleanText)}</div>
+        </div>`;
+      return;
+    }
+
+    // Fallback: show search results if passage lookup fails
+    if (searchData.data && searchData.data.verses && searchData.data.verses.length > 0) {
+      const verses = searchData.data.verses.slice(0, 5);
+      const transName = document.querySelector('.trans-btn.active')?.textContent || 'Bible';
+      resultsEl.innerHTML = `
+        <div style="font-family:'Courier New',monospace;font-size:11px;color:var(--text-faint);margin-bottom:14px;letter-spacing:0.15em">SEARCH RESULTS FOR "${x(query)}"</div>
+        ${verses.map(v => `
+          <div style="background:rgba(22,16,8,0.7);border:1px solid rgba(100,200,120,0.2);border-radius:6px;padding:16px 18px;margin-bottom:10px">
+            <div style="font-family:'Courier New',monospace;font-size:11px;color:#90d890;margin-bottom:8px">${x(v.reference)}</div>
+            <div style="font-size:17px;line-height:1.9;color:#ffffff">${x(v.text.trim())}</div>
+          </div>`).join('')}`;
+      return;
+    }
+
+    // Nothing found
+    resultsEl.innerHTML = `
+      <div style="background:rgba(22,16,8,0.7);border:1px solid rgba(200,100,100,0.25);border-radius:6px;padding:18px 20px">
+        <div style="color:#e09090;font-size:15px;margin-bottom:8px">Passage not found.</div>
+        <div style="color:var(--text-faint);font-size:13px;line-height:1.8">
+          Try formatting like:<br>
+          <span style="color:#90d890;font-family:'Courier New',monospace">JHN.3.16</span> &nbsp;·&nbsp;
+          <span style="color:#90d890;font-family:'Courier New',monospace">PSA.23</span> &nbsp;·&nbsp;
+          <span style="color:#90d890;font-family:'Courier New',monospace">ROM.8.28-ROM.8.39</span>
+        </div>
+      </div>`;
+
+  } catch(e) {
+    loadingEl.style.display = 'none';
+    resultsEl.innerHTML = `<div style="color:var(--text-faint);font-style:italic;font-size:15px;padding:10px">Connection error. Check your internet and try again.</div>`;
+  }
+};
+
+
+// ── RESOURCE ROOM ────────────────────────────
+
+const TIMELINE = [
+  { date:'Before Time', title:'Creation', desc:'God creates the heavens, earth, and humanity in six days. Adam and Eve placed in Eden. Perfect relationship between Creator and creation. The foundation of all that follows.', books:'Genesis 1–2' },
+  { date:'Unknown — Early History', title:'The Fall', desc:'Adam and Eve eat from the forbidden tree. Sin enters the world. The relationship between God and humanity is broken. God promises a coming Redeemer — the first gospel (Genesis 3:15).', books:'Genesis 3' },
+  { date:'Unknown', title:'Cain, Abel & Early Humanity', desc:'Murder enters history. Humanity multiplies but wickedness grows. The line of Seth preserves faith. Enoch walks with God. Methuselah lives 969 years.', books:'Genesis 4–5' },
+  { date:'~2350 BC (traditional)', title:'Noah & the Flood', desc:'God judges a corrupt world through a global flood. Noah and his family are preserved. God establishes His first formal covenant with humanity, marked by the rainbow.', books:'Genesis 6–9' },
+  { date:'~2100 BC', title:'Tower of Babel', desc:'Humanity unites in pride to build a tower reaching heaven. God scatters them by confusing their languages — the origin of the nations.', books:'Genesis 11' },
+  { date:'~2000 BC', title:'Abraham — Father of Faith', desc:'God calls Abram from Ur of the Chaldeans. Promises him land, descendants as numerous as stars, and that through him all nations will be blessed. God changes his name to Abraham. Isaac is born miraculously.', books:'Genesis 12–25' },
+  { date:'~1900 BC', title:'Isaac, Jacob & the Twelve Tribes', desc:'God renews the covenant with Isaac and then Jacob. Jacob wrestles with God and is renamed Israel. His twelve sons become the twelve tribes of Israel. Joseph is sold into slavery by his brothers.', books:'Genesis 25–50' },
+  { date:'~1700–1446 BC', title:'Israel in Egypt', desc:'Joseph rises to power in Egypt and saves his family from famine. Israel grows into a great nation but is eventually enslaved. Four hundred years of bondage.', books:'Genesis 37–50; Exodus 1' },
+  { date:'~1446 BC', title:'The Exodus — Moses & the Law', desc:'God raises up Moses to deliver Israel from Egypt through ten plagues including the first Passover. The Red Sea parts. God gives the Ten Commandments and the Law at Mount Sinai. The tabernacle is built.', books:'Exodus, Leviticus, Numbers, Deuteronomy' },
+  { date:'~1406 BC', title:'Conquest of Canaan — Joshua', desc:'Moses dies. Joshua leads Israel into the Promised Land. Jericho falls. The land is divided among the twelve tribes. Joshua\'s famous charge: "As for me and my house, we will serve the Lord."', books:'Joshua' },
+  { date:'~1375–1050 BC', title:'The Judges — Cycles of Sin', desc:'Israel repeatedly turns from God, faces oppression, cries out, and God raises a judge-deliverer. Deborah, Gideon, Samson. The dark period ends with "everyone did what was right in their own eyes."', books:'Judges, Ruth' },
+  { date:'~1050 BC', title:'Samuel & the First King', desc:'Samuel is the last judge and first great prophet. Israel demands a king. God grants their request with warning. Saul is anointed — gifted but disobedient.', books:'1 Samuel 1–15' },
+  { date:'~1010–970 BC', title:'King David — A Man After God\'s Own Heart', desc:'David defeats Goliath, flees Saul, becomes king over all Israel, captures Jerusalem. God makes an eternal covenant with David: his throne will last forever. David sins greatly with Bathsheba and suffers severe consequences. He writes most of the Psalms.', books:'1 Samuel 16 – 2 Samuel; Psalms' },
+  { date:'~970–930 BC', title:'Solomon — Wisdom & the Temple', desc:'David\'s son Solomon asks for wisdom and receives it. He builds the magnificent Temple in Jerusalem. But he takes 700 wives, turns to idolatry, and the kingdom begins to fracture.', books:'1 Kings 1–11; Proverbs; Ecclesiastes; Song of Solomon' },
+  { date:'~930 BC', title:'The Kingdom Divides', desc:'After Solomon\'s death the kingdom splits: Israel (10 northern tribes) and Judah (2 southern tribes). A succession of mostly wicked kings. The prophets arise to call both kingdoms back to God.', books:'1 Kings 12 – 2 Kings; 1–2 Chronicles' },
+  { date:'~850–700 BC', title:'The Prophets — Elijah, Elisha, Isaiah, Hosea', desc:'Elijah confronts Baal worship and calls fire from heaven. Elisha performs miracles. Isaiah prophesies the coming Messiah with stunning detail 700 years before Christ. Hosea\'s marriage becomes a living parable of God\'s love for unfaithful Israel.', books:'1–2 Kings; Isaiah, Hosea, Amos, Micah' },
+  { date:'~722 BC', title:'Fall of the Northern Kingdom', desc:'Assyria conquers Israel. The ten northern tribes are scattered — the "lost tribes." A direct result of generations of idolatry and rebellion.', books:'2 Kings 17' },
+  { date:'~626–586 BC', title:'Jeremiah & the Fall of Jerusalem', desc:'Jeremiah weeps as he warns Judah of coming destruction. They refuse to listen. Babylon under Nebuchadnezzar destroys Jerusalem and the Temple. The people are taken into exile.', books:'Jeremiah, Lamentations, Habakkuk, Zephaniah' },
+  { date:'~605–538 BC', title:'The Babylonian Exile', desc:'Daniel and his friends remain faithful in Babylon — fiery furnace, lion\'s den. Ezekiel prophesies to the exiles with visions of restoration. Jeremiah\'s letter tells them to seek the peace of the city while they wait.', books:'Daniel, Ezekiel' },
+  { date:'~538 BC', title:'Return from Exile — Ezra & Nehemiah', desc:'Persia conquers Babylon. Cyrus the Great decrees the Jews may return. Zerubbabel leads the first return and rebuilds the Temple. Ezra brings spiritual renewal. Nehemiah rebuilds Jerusalem\'s walls in 52 days.', books:'Ezra, Nehemiah, Haggai, Zechariah, Malachi' },
+  { date:'~400–4 BC', title:'The Silent Years — Intertestamental Period', desc:'400 years between Malachi and Matthew with no new Scripture. Alexander the Great spreads Greek culture. Rome rises to power. The Jewish people wait for their Messiah. The Greek Old Testament (Septuagint) is produced.', books:'(Between Malachi and Matthew)' },
+  { date:'~4 BC', title:'The Birth of Jesus', desc:'The Son of God enters human history as a baby born to a virgin in Bethlehem. Angels appear to shepherds. Magi come from the East. Herod murders the innocents. The family flees to Egypt.', books:'Matthew 1–2; Luke 1–2' },
+  { date:'~26–30 AD', title:'The Ministry of Jesus', desc:'Jesus is baptized by John and begins three years of teaching, healing, and revealing the Kingdom of God. The Sermon on the Mount. Twelve disciples called. Water to wine. Feeding 5,000. Walking on water. Raising Lazarus.', books:'Matthew, Mark, Luke, John' },
+  { date:'~30 AD', title:'The Crucifixion & Resurrection', desc:'Jesus is arrested, tried, and crucified. Three days later He rises bodily from the dead — the pivotal event in all of history. He appears to over 500 people before ascending to the Father.', books:'Matthew 26–28; Mark 14–16; Luke 22–24; John 18–21' },
+  { date:'~30 AD', title:'Pentecost & the Birth of the Church', desc:'The Holy Spirit descends on the disciples at Pentecost. 3,000 are saved in one day. The church is born. Peter preaches boldly. Signs and wonders accompany the Gospel.', books:'Acts 1–2' },
+  { date:'~33–62 AD', title:'Paul\'s Missionary Journeys', desc:'Saul of Tarsus — a persecutor of Christians — is dramatically converted on the road to Damascus. Renamed Paul, he makes three missionary journeys planting churches across the Roman world. He writes 13 epistles while in prison and on the road.', books:'Acts 9–28; Romans through Philemon' },
+  { date:'~48–65 AD', title:'The New Testament Letters', desc:'Paul, Peter, James, John, and Jude write letters to churches and individuals. These letters define Christian theology, address problems, encourage persecuted believers, and establish church life.', books:'Romans through Jude' },
+  { date:'~70 AD', title:'Destruction of Jerusalem', desc:'Rome destroys Jerusalem and the Temple — just as Jesus predicted in Matthew 24. One million Jews killed. A watershed moment confirming Jesus as a true prophet.', books:'(Historical; Jesus prophesied in Matthew 24)' },
+  { date:'~95 AD', title:'Revelation — The End of the Story', desc:'The aged apostle John receives a vision on the island of Patmos. Letters to seven churches. Visions of heaven, judgment, tribulation, and the return of Christ. The new heaven and new earth. God\'s story ends not with destruction but with restoration — "He will dwell with them and they will be His people."', books:'Revelation' },
+];
+
+const PEOPLE = [
+  { name:'Adam', role:'First Man', desc:'Created from dust in the image of God, placed in Eden as its keeper. His disobedience brought sin and death into the world. Yet he is also a "type" of Christ — as in Adam all die, so in Christ all are made alive (1 Cor 15:22).', verse:'Genesis 1–3; Romans 5:12' },
+  { name:'Eve', role:'First Woman', desc:'Created from Adam\'s rib as his equal partner and companion. First deceived by the serpent, she chose knowledge over obedience. Her name means "mother of all living." God\'s first promise of redemption (Gen 3:15) was given directly after her fall.', verse:'Genesis 2–3' },
+  { name:'Noah', role:'Builder of the Ark', desc:'A righteous man in a corrupt generation. God chose him to preserve humanity and all animal life through a global flood. The covenant God made with Noah after the flood — marked by a rainbow — was the first formal covenant with all humanity.', verse:'Genesis 6–9; Hebrews 11:7' },
+  { name:'Abraham', role:'Father of Faith', desc:'Called from Ur at age 75 with no explanation — just a command to go. He obeyed. God made him an unconditional covenant: land, descendants, and blessing to all nations. His willingness to sacrifice Isaac was the greatest test of faith in the Old Testament. Through him, Jesus came.', verse:'Genesis 12–25; Romans 4; Hebrews 11:8–19' },
+  { name:'Moses', role:'Deliverer & Lawgiver', desc:'Raised as an Egyptian prince, fled to the wilderness for 40 years, then called by God from a burning bush to lead Israel out of slavery. Received the Ten Commandments on Sinai. Spoke with God "face to face." Saw God\'s glory pass by. Yet never entered the Promised Land.', verse:'Exodus–Deuteronomy; Hebrews 11:24–27' },
+  { name:'Joshua', role:'Military Leader & Successor to Moses', desc:'Moses\' servant and successor. Led Israel across the Jordan and into Canaan. Conquered Jericho by walking around it. Divided the Promised Land among the tribes. His final address: "Choose this day whom you will serve."', verse:'Joshua; Hebrews 11:30' },
+  { name:'Deborah', role:'Judge & Prophetess', desc:'The only female judge in Israel\'s history. Led Israel during a period of oppression. A military leader, prophet, and poet. Her victory song (Judges 5) is one of the oldest texts in the Bible. A woman of remarkable faith and courage in a patriarchal age.', verse:'Judges 4–5' },
+  { name:'Samuel', role:'Last Judge, First Prophet', desc:'Born in answer to his barren mother Hannah\'s desperate prayer. Dedicated to God from birth. Heard God\'s voice as a boy when Israel had nearly stopped listening. Anointed both Saul and David as king. Defined what it meant to be a prophet.', verse:'1 Samuel 1–25' },
+  { name:'David', role:'King, Poet, Man After God\'s Own Heart', desc:'A shepherd boy who killed a giant with a stone. Became Israel\'s greatest king. A warrior, a musician, a poet who wrote most of the Psalms. Deeply loved God and deeply sinned. His repentance after adultery and murder (Psalm 51) remains one of history\'s most honest prayers. God promised his throne would last forever — fulfilled in Christ.', verse:'1 Samuel 16 – 1 Kings 2; Psalms; Acts 13:22' },
+  { name:'Solomon', role:'Wisest King', desc:'Asked God for wisdom rather than wealth or victory. Received all three. Built the Temple in Jerusalem. Wrote Proverbs, Ecclesiastes, and Song of Solomon. Yet his many foreign wives turned his heart to idols. Ecclesiastes records his late-life reckoning: "All is vanity without God."', verse:'1 Kings 1–11; Proverbs; Ecclesiastes' },
+  { name:'Elijah', role:'Prophet of Fire', desc:'Called fire from heaven on Mount Carmel, defeating 450 prophets of Baal. Then immediately fled in terror from one woman — Jezebel. Found by God under a juniper tree, burned out and suicidal. Fed by an angel. Given a still small voice. A picture of both supernatural courage and very human despair.', verse:'1 Kings 17–19, 21; 2 Kings 1–2' },
+  { name:'Isaiah', role:'Gospel Prophet', desc:'Wrote 700 years before Christ with a clarity that sounds like an eyewitness. Chapter 53 describes the crucifixion in detail — the suffering servant who bore our sin. Called in a vision of God\'s holiness (ch. 6) that broke him and then commissioned him. His book spans judgment and the most beautiful promises of restoration in all of Scripture.', verse:'Isaiah; quoted 65+ times in New Testament' },
+  { name:'Jeremiah', role:'The Weeping Prophet', desc:'Called as a young man to preach a message nobody wanted to hear — for 40 years. Mocked, beaten, imprisoned, thrown into a cistern. Never saw visible fruit of his ministry. Yet he kept going because "his word was in my heart like a burning fire shut up in my bones." He promised a New Covenant.', verse:'Jeremiah 1; 31:31–34; Lamentations' },
+  { name:'Daniel', role:'Prophet in Exile', desc:'Taken to Babylon as a teenager. Refused to eat the king\'s food. Interpreted dreams. Survived the lion\'s den at age 80+ because he prayed three times a day regardless of the law. His prophecies of world empires and end times are among the most studied in Scripture.', verse:'Daniel; Matthew 24' },
+  { name:'Esther', role:'Queen Who Saved Her People', desc:'A Jewish orphan who became queen of Persia. Risked her life to save her people from genocide. Guided by her cousin Mordecai\'s famous words: "Who knows whether you have not come to the kingdom for such a time as this?" God\'s name never appears in this book — yet His providence is on every page.', verse:'Esther 4:14' },
+  { name:'Mary', role:'Mother of Jesus', desc:'A young Jewish girl from Nazareth, engaged to Joseph, visited by the angel Gabriel. Her response to the impossible: "Let it be to me according to your word." She pondered all things in her heart. She stood at the cross. She was in the upper room at Pentecost. A model of humble, wondering faith.', verse:'Luke 1–2; John 19; Acts 1' },
+  { name:'John the Baptist', role:'The Voice in the Wilderness', desc:'Born six months before Jesus, his cousin. Lived in the desert, ate locusts, wore camel hair. Preached repentance to crowds who came from all of Jerusalem. Baptized Jesus. Said of himself: "I am not worthy to untie his sandals." Jesus called him the greatest man born of woman.', verse:'Matthew 3; John 1:19–34; Matthew 11:11' },
+  { name:'Peter', role:'Apostle, Leader of the Early Church', desc:'A fisherman, impulsive and passionate. Walked on water. Declared Jesus the Messiah. Then denied him three times on the night of his arrest. Restored by Jesus over breakfast. Preached at Pentecost — 3,000 saved. Wrote two letters. Crucified upside down under Nero.', verse:'Matthew 4, 16, 26; John 21; Acts 2; 1–2 Peter' },
+  { name:'Paul', role:'Apostle to the Gentiles', desc:'Born Saul of Tarsus, a Pharisee who consented to Stephen\'s stoning and hunted Christians. Encountered the risen Christ on the Damascus road — blinded, converted, transformed. Became Christianity\'s greatest missionary and theologian. Wrote 13 New Testament letters, often from prison. Executed by Nero around 67 AD.', verse:'Acts 9; Philippians 3; Romans 1; 2 Corinthians 11' },
+  { name:'John the Apostle', role:'The Beloved Disciple', desc:'Called with his brother James by Jesus from their fishing nets. Described himself as "the disciple whom Jesus loved." Leaned against Jesus at the Last Supper. Stood at the cross. Ran to the empty tomb. Wrote the Gospel of John, three epistles, and Revelation. Died of old age — the only apostle not martyred.', verse:'John 13; 19–21; 1 John 4; Revelation 1' },
+];
+
+const BOOKS_OT = [
+  { num:1, name:'Genesis', meta:'Law · 50 chapters', desc:'The book of beginnings: Creation, the Fall, the Flood, and God\'s covenant with Abraham. The foundation on which all of Scripture rests.' },
+  { num:2, name:'Exodus', meta:'Law · 40 chapters', desc:'God delivers Israel from Egyptian slavery through Moses. The Ten Commandments and the Law are given at Sinai. The tabernacle is built as God\'s dwelling place among His people.' },
+  { num:3, name:'Leviticus', meta:'Law · 27 chapters', desc:'The instruction manual for Israel\'s priests and worship. Holiness is the theme: "Be holy, for I am holy." Every sacrifice points forward to the perfect sacrifice of Christ.' },
+  { num:4, name:'Numbers', meta:'Law · 36 chapters', desc:'Israel\'s 40 years of wilderness wandering — the result of unbelief at Kadesh Barnea. A generation that saw miracles still could not trust God. A sobering warning about hardened hearts.' },
+  { num:5, name:'Deuteronomy', meta:'Law · 34 chapters', desc:'Moses\' final sermons to Israel before they enter Canaan. A passionate call to love God with all the heart. Contains the Shema (6:4) — the foundation of Jewish faith.' },
+  { num:6, name:'Joshua', meta:'History · 24 chapters', desc:'The conquest of the Promised Land under Joshua. Jericho falls at a shout. The land is divided. Closes with Joshua\'s great challenge: "Choose this day whom you will serve."' },
+  { num:7, name:'Judges', meta:'History · 21 chapters', desc:'A dark cycle of sin, oppression, repentance, and deliverance. Twelve judges raise up by God. Ends with everyone doing "what was right in their own eyes" — moral chaos.' },
+  { num:8, name:'Ruth', meta:'History · 4 chapters', desc:'A beautiful short story of loyalty, love, and redemption set during the time of judges. Ruth\'s devotion to her mother-in-law and Boaz as kinsman-redeemer are pictures of Christ.' },
+  { num:9, name:'1 Samuel', meta:'History · 31 chapters', desc:'Israel demands a king. Saul is anointed and fails. David emerges — the shepherd boy who kills Goliath — and is anointed as God\'s chosen king.' },
+  { num:10, name:'2 Samuel', meta:'History · 24 chapters', desc:'David\'s reign in full — his greatest victories, his devastating sins with Bathsheba and Uriah, and the covenant God makes with him for an eternal throne.' },
+  { num:11, name:'1 Kings', meta:'History · 22 chapters', desc:'Solomon\'s wisdom and the building of the Temple. Then his failure. The kingdom divides. Elijah confronts Baal on Mount Carmel.' },
+  { num:12, name:'2 Kings', meta:'History · 25 chapters', desc:'The steady decline and fall of both kingdoms. Israel falls to Assyria (722 BC). Judah falls to Babylon (586 BC). Jerusalem and the Temple are destroyed.' },
+  { num:13, name:'1 Chronicles', meta:'History · 29 chapters', desc:'Israel\'s history retold from a priestly perspective, emphasizing the covenant and the Temple. Traces David\'s line as the basis for hope.' },
+  { num:14, name:'2 Chronicles', meta:'History · 36 chapters', desc:'From Solomon\'s Temple to its destruction. Focuses on the kings of Judah and their faithfulness or unfaithfulness to God and the Temple. Ends with Cyrus\'s decree to return.' },
+  { num:15, name:'Ezra', meta:'History · 10 chapters', desc:'The return from Babylonian exile and the rebuilding of the Temple. Ezra leads a spiritual renewal, calling the people back to the Law of Moses.' },
+  { num:16, name:'Nehemiah', meta:'History · 13 chapters', desc:'Nehemiah rebuilds Jerusalem\'s walls in 52 days despite intense opposition. A model of prayer, planning, and persevering leadership in the face of resistance.' },
+  { num:17, name:'Esther', meta:'History · 10 chapters', desc:'A Jewish girl becomes queen of Persia and saves her people from genocide. God\'s name never appears, yet His unseen hand is on every page — the greatest example of divine providence in Scripture.' },
+  { num:18, name:'Job', meta:'Poetry · 42 chapters', desc:'The oldest book of the Bible explores the most painful question: why do the righteous suffer? Job\'s friends offer easy answers; God answers with questions. Faith is not explained but deepened.' },
+  { num:19, name:'Psalms', meta:'Poetry · 150 chapters', desc:'The prayer book and hymnal of Scripture. Every human emotion is present: praise, grief, anger, despair, trust, wonder. The most quoted Old Testament book in the New Testament.' },
+  { num:20, name:'Proverbs', meta:'Poetry · 31 chapters', desc:'Practical wisdom for everyday life, mostly from Solomon. "The fear of the Lord is the beginning of wisdom" is the organizing principle. Covers work, speech, relationships, money, and character.' },
+  { num:21, name:'Ecclesiastes', meta:'Poetry · 12 chapters', desc:'Solomon\'s late-life reflection: a relentless search for meaning in everything under the sun. The conclusion after exhausting every option: "Fear God and keep His commandments — this is the whole duty of man."' },
+  { num:22, name:'Song of Solomon', meta:'Poetry · 8 chapters', desc:'A love poem celebrating marital love between a man and woman. Read by Jews as a picture of God\'s love for Israel; by Christians as a picture of Christ\'s love for the Church.' },
+  { num:23, name:'Isaiah', meta:'Prophecy · 66 chapters', desc:'The greatest of the prophets. Called in a vision of God\'s holiness. Prophesied the virgin birth, the suffering servant, and Israel\'s restoration with a clarity that sounds like an eyewitness. Chapter 53 describes the crucifixion 700 years before it happened.' },
+  { num:24, name:'Jeremiah', meta:'Prophecy · 52 chapters', desc:'Called to preach a message nobody wanted to hear for 40 years. Wept over Jerusalem\'s coming destruction. Promised a New Covenant written on the heart — the covenant Jesus fulfilled.' },
+  { num:25, name:'Lamentations', meta:'Prophecy · 5 chapters', desc:'Jeremiah\'s raw grief over the destruction of Jerusalem. Five poems of devastating sorrow. Yet in the middle, a shaft of light: "His mercies are new every morning; great is Your faithfulness."' },
+  { num:26, name:'Ezekiel', meta:'Prophecy · 48 chapters', desc:'A prophet of visions among the Babylonian exiles. Sees God\'s glory departing the Temple and then returning. The valley of dry bones. Promises of a new heart and a new spirit.' },
+  { num:27, name:'Daniel', meta:'Prophecy · 12 chapters', desc:'A young man who remained faithful in a pagan empire through the fiery furnace, the lion\'s den, and decades of political pressure. His prophecies of world empires and the end of days are among the most studied in Scripture.' },
+  { num:28, name:'Hosea', meta:'Prophecy · 14 chapters', desc:'God commands Hosea to marry an unfaithful woman as a living parable of God\'s love for unfaithful Israel. The most personal of all prophetic books — love that keeps pursuing even when rejected.' },
+  { num:29, name:'Joel', meta:'Prophecy · 3 chapters', desc:'A locust plague becomes the occasion for a call to repentance and a promise of restoration. "I will pour out my Spirit on all flesh" — quoted by Peter at Pentecost.' },
+  { num:30, name:'Amos', meta:'Prophecy · 9 chapters', desc:'A shepherd called to preach to the prosperous and corrupt northern kingdom. God is not impressed by religious activity that ignores justice. "Let justice roll down like waters."' },
+  { num:31, name:'Obadiah', meta:'Prophecy · 1 chapter', desc:'The shortest Old Testament book. Judgment on Edom (Esau\'s descendants) for rejoicing over Jerusalem\'s fall. A reminder that pride before God leads to destruction.' },
+  { num:32, name:'Jonah', meta:'Prophecy · 4 chapters', desc:'A prophet who runs from God\'s call, is swallowed by a great fish, and eventually preaches to Israel\'s enemies in Nineveh. The real story is not the fish — it\'s Jonah\'s resistance to God\'s mercy for outsiders.' },
+  { num:33, name:'Micah', meta:'Prophecy · 7 chapters', desc:'Prophesied that the Messiah would be born in Bethlehem (5:2). Summed up God\'s requirements with stunning simplicity: "Do justice, love kindness, and walk humbly with your God."' },
+  { num:34, name:'Nahum', meta:'Prophecy · 3 chapters', desc:'The fall of Nineveh — 150 years after Jonah\'s mission. God is patient, but His justice is certain. Nineveh\'s repentance under Jonah did not last.' },
+  { num:35, name:'Habakkuk', meta:'Prophecy · 3 chapters', desc:'A prophet who dares to argue with God about injustice. God\'s answer is mysterious: He\'s using Babylon to judge Judah. The conclusion after wrestling: "I will joy in the God of my salvation."' },
+  { num:36, name:'Zephaniah', meta:'Prophecy · 3 chapters', desc:'Warning of the coming Day of the Lord\'s judgment — then a remarkable reversal: God Himself will rejoice over His people with singing. One of the most tender portraits of God in the Old Testament.' },
+  { num:37, name:'Haggai', meta:'Prophecy · 2 chapters', desc:'After the return from exile, the people build their own houses while God\'s Temple sits in ruins. Haggai calls them to prioritize God\'s house. A short but sharp book about misplaced priorities.' },
+  { num:38, name:'Zechariah', meta:'Prophecy · 14 chapters', desc:'Rich in messianic prophecy — the king enters Jerusalem on a donkey (9:9), thirty pieces of silver (11:12–13), the pierced one (12:10). Visions of restoration and the coming kingdom.' },
+  { num:39, name:'Malachi', meta:'Prophecy · 4 chapters', desc:'The last voice before 400 years of silence. Addresses a weary, cynical people who doubt God\'s love. Promises the return of Elijah before the great day — fulfilled in John the Baptist.' },
+];
+
+const BOOKS_NT = [
+  { num:40, name:'Matthew', meta:'Gospel · 28 chapters', desc:'Written to a Jewish audience, presenting Jesus as the promised Messiah and King. Five major discourses including the Sermon on the Mount. Begins with the genealogy connecting Jesus to Abraham and David.' },
+  { num:41, name:'Mark', meta:'Gospel · 16 chapters', desc:'The shortest, fastest-paced Gospel — the word "immediately" appears 41 times. Written for Roman readers. Emphasizes Jesus as a man of action, the Servant who came not to be served but to serve.' },
+  { num:42, name:'Luke', meta:'Gospel · 24 chapters', desc:'Written by a physician for a Greek audience. The most comprehensive Gospel, including the most parables. Special attention to women, the poor, and outsiders. The Prodigal Son is here.' },
+  { num:43, name:'John', meta:'Gospel · 21 chapters', desc:'Theological and intimate. Seven "I AM" statements. Begins before Creation: "In the beginning was the Word." Written so that readers "may believe that Jesus is the Christ, the Son of God."' },
+  { num:44, name:'Acts', meta:'History · 28 chapters', desc:'Luke\'s sequel: the birth and spread of the church from Jerusalem to Rome. Pentecost, Stephen\'s martyrdom, Paul\'s conversion, three missionary journeys. The Gospel goes to the Gentile world.' },
+  { num:45, name:'Romans', meta:'Letter · 16 chapters', desc:'Paul\'s theological masterpiece — the most systematic presentation of the Gospel in Scripture. Sin, justification by faith, grace, sanctification, Israel\'s future, and practical Christian life.' },
+  { num:46, name:'1 Corinthians', meta:'Letter · 16 chapters', desc:'Paul addresses a church with serious problems: division, immorality, lawsuits, spiritual pride. Chapter 13 on love and chapter 15 on resurrection are among the most celebrated passages in the Bible.' },
+  { num:47, name:'2 Corinthians', meta:'Letter · 13 chapters', desc:'Paul\'s most personal letter — deeply vulnerable about his sufferings, weaknesses, and the nature of true ministry. "My grace is sufficient for you, for my power is made perfect in weakness."' },
+  { num:48, name:'Galatians', meta:'Letter · 6 chapters', desc:'An urgent defense of justification by faith alone. Paul is astonished that the Galatians are deserting the Gospel for a salvation-by-works system. Luther called this "my epistle — I have betrothed myself to it."' },
+  { num:49, name:'Ephesians', meta:'Letter · 6 chapters', desc:'Three chapters of breathtaking theology about what believers have in Christ — then three chapters of how to live it. The armor of God. The body of Christ. Marriage as a picture of Christ and the Church.' },
+  { num:50, name:'Philippians', meta:'Letter · 4 chapters', desc:'The joy letter — written from prison. "Rejoice in the Lord always; again I will say, rejoice." The great Christ-hymn (2:5–11) on humility. "I can do all things through Him who strengthens me."' },
+  { num:51, name:'Colossians', meta:'Letter · 4 chapters', desc:'Written against an early heresy mixing Christianity with philosophy and mysticism. Paul\'s response: Christ is sufficient — the fullness of deity dwells in Him bodily. Don\'t add anything.' },
+  { num:52, name:'1 Thessalonians', meta:'Letter · 5 chapters', desc:'One of Paul\'s earliest letters. Encouragement to a young church under persecution. Teaches on the return of Christ and the resurrection of believers.' },
+  { num:53, name:'2 Thessalonians', meta:'Letter · 3 chapters', desc:'Corrects confusion about the Day of the Lord — some thought it had already come. Addresses idleness and calls believers to stand firm in sound doctrine.' },
+  { num:54, name:'1 Timothy', meta:'Letter · 6 chapters', desc:'Paul\'s pastoral letter to his young protégé Timothy leading the church in Ephesus. Qualifications for elders and deacons, sound doctrine, and Paul\'s famous testimony: "Christ Jesus came to save sinners, of whom I am the worst."' },
+  { num:55, name:'2 Timothy', meta:'Letter · 4 chapters', desc:'Paul\'s final letter, written just before his execution. "I have fought the good fight, I have finished the race, I have kept the faith." A charge to Timothy to preach the word faithfully.' },
+  { num:56, name:'Titus', meta:'Letter · 3 chapters', desc:'Instructions for organizing the church on the island of Crete. Emphasizes sound doctrine leading to godly living. Elders\' qualifications, conduct for all ages, and grace that teaches us to say no to ungodliness.' },
+  { num:57, name:'Philemon', meta:'Letter · 1 chapter', desc:'The most personal of Paul\'s letters — a request to receive back a runaway slave, Onesimus, as a brother in Christ. A living illustration of substitutionary atonement: "Charge that to my account."' },
+  { num:58, name:'Hebrews', meta:'Letter · 13 chapters', desc:'Demonstrates the superiority of Christ over everything in the Old Testament: angels, Moses, the priesthood, the Temple, the sacrifices. Written to Jewish Christians tempted to return to Judaism. Chapter 11 is the Hall of Faith.' },
+  { num:59, name:'James', meta:'Letter · 5 chapters', desc:'The most practical New Testament letter — not about how to be saved but how saved people live. "Faith without works is dead." Tames the tongue. Cares for the poor. Prays for the sick.' },
+  { num:60, name:'1 Peter', meta:'Letter · 5 chapters', desc:'Written to persecuted Christians scattered across Asia Minor. Suffering is not senseless — it purifies faith. Live as strangers and pilgrims. "Cast all your anxiety on Him because He cares for you."' },
+  { num:61, name:'2 Peter', meta:'Letter · 3 chapters', desc:'Warning against false teachers who will arise within the church. The Scriptures are God-breathed. "The Lord is not slow to fulfill His promise... He is patient toward you, not wishing that any should perish."' },
+  { num:62, name:'1 John', meta:'Letter · 5 chapters', desc:'Written to combat early Gnostic heresy. Tests for genuine faith: obedience, love, and right belief about Jesus. "God is love" — the most concentrated statement about God\'s nature in Scripture.' },
+  { num:63, name:'2 John', meta:'Letter · 1 chapter', desc:'A brief letter to a specific church or individual. Walk in truth and love. Do not welcome false teachers or give them a platform — a warning still relevant today.' },
+  { num:64, name:'3 John', meta:'Letter · 1 chapter', desc:'A personal letter commending Gaius for his hospitality to traveling missionaries, and rebuking Diotrephes who loves to be first and refuses to welcome the brothers.' },
+  { num:65, name:'Jude', meta:'Letter · 1 chapter', desc:'An urgent warning about false teachers who have crept into the church. Contend earnestly for the faith. Strikingly, Jude quotes from non-canonical Jewish writings — Scripture is not the only source of truth.' },
+  { num:66, name:'Revelation', meta:'Prophecy · 22 chapters', desc:'The apocalyptic vision given to John on Patmos. Letters to seven churches, cosmic judgment, the return of Christ, and the new heaven and new earth. God\'s story ends with restoration, not destruction.' },
+];
+
+const NAMES = [
+  { orig:'יהוה', trans:'Yahweh / YHWH (Jehovah)', meaning:'I AM WHO I AM — The Self-Existent One', desc:'The personal name of God revealed to Moses at the burning bush. So holy that Jewish scribes would not even pronounce it. Occurs over 6,800 times in the Old Testament. Rendered as LORD (all caps) in most English Bibles. It speaks of God\'s eternal, uncaused existence — He does not derive being from anything outside Himself.' },
+  { orig:'אֱלֹהִים', trans:'Elohim', meaning:'The Strong Creator God', desc:'The first name for God in Scripture: "In the beginning, Elohim created." A plural noun used with singular verbs — a hint of the Trinity. Emphasizes God\'s power and sovereignty as Creator and Sustainer. Used about 2,600 times in the Old Testament.' },
+  { orig:'אֲדֹנָי', trans:'Adonai', meaning:'Lord, Master, Owner', desc:'Speaks of God\'s authority and our complete dependence on Him. A worshipper approaching God acknowledges: He is Lord, I am servant. Jewish readers substituted Adonai whenever Yahweh appeared in the text — this is why many English Bibles use Lord for Yahweh.' },
+  { orig:'אֵל שַׁדַּי', trans:'El Shaddai', meaning:'God Almighty / God of the Mountains', desc:'The name by which God revealed Himself to Abraham. Associated with the sufficiency of God — He is more than enough. Occurs 48 times in Job alone, the book most concerned with suffering and God\'s sovereign power. He is strong enough to handle whatever you face.' },
+  { orig:'יְהוָה יִרְאֶה', trans:'Yahweh Yireh', meaning:'The LORD Will Provide', desc:'The name Abraham gave the mountain where God provided a ram in place of Isaac. Not just "God provides" but "The LORD will be seen" — He shows up at the point of your greatest need. Every provision in your life bears this name.' },
+  { orig:'יְהוָה רֹפְאֶךָ', trans:'Yahweh Rapha', meaning:'The LORD Who Heals', desc:'Revealed after the bitter waters of Marah were made sweet. Speaks to physical, emotional, and spiritual healing. The Hebrew rapha implies restoration to wholeness — not just the absence of disease but the presence of shalom.' },
+  { orig:'יְהוָה שַׁמָּה', trans:'Yahweh Shammah', meaning:'The LORD Is There', desc:'The name given to the restored Jerusalem in Ezekiel\'s final vision. The ultimate promise: wherever God\'s people are, He is present. Fulfilled in Christ — Immanuel, God with us — and ultimately in Revelation 21: "The dwelling of God is with man."' },
+  { orig:'יְהוָה שָׁלוֹם', trans:'Yahweh Shalom', meaning:'The LORD Is Peace', desc:'The name Gideon gave the altar he built when God assured him of victory. Shalom is not merely peace as the absence of conflict — it is completeness, wholeness, flourishing. Jesus left His disciples this peace: "Not as the world gives do I give to you."' },
+  { orig:'אַבָּא', trans:'Abba', meaning:'Father / Daddy', desc:'The most intimate New Testament name for God — used by Jesus in Gethsemane and by Paul to describe how the Spirit enables believers to cry out to God. Not a distant sovereign but a Father who knows His children by name. The entire movement of the Bible is from the distance of Eden to the intimacy of Abba.' },
+  { orig:'θεός', trans:'Theos', meaning:'God — The Divine Being', desc:'The primary Greek word for God in the New Testament — the word used in John 1:1: "In the beginning was the Word, and the Word was with God (Theos), and the Word was God (Theos)." The same word used in Greek translations for Elohim.' },
+  { orig:'κύριος', trans:'Kyrios', meaning:'Lord', desc:'The Greek word used to translate Yahweh in the Septuagint (Greek Old Testament). When the New Testament applies Kyrios to Jesus — as Peter does at Pentecost — it is making an explicit claim that Jesus is Yahweh. A staggering theological statement wrapped in a single word.' },
+  { orig:'עֶלְיוֹן', trans:'El Elyon', meaning:'God Most High', desc:'First used by Melchizedek when he blessed Abraham. Emphasizes God\'s supremacy over all other powers and authorities. Nothing — no government, no circumstance, no spiritual force — is higher than El Elyon. Used by Daniel in Babylon as an act of political and theological defiance.' },
+];
+
+const TERMS = [
+  { word:'Covenant', orig:'Hebrew: בְּרִית (berith) / Greek: διαθήκη (diatheke)', def:'A solemn, binding agreement between God and His people. More than a contract — it involves loyalty, love, and relationship. The Bible is structured around covenants: Noahic, Abrahamic, Mosaic, Davidic, and the New Covenant in Christ\'s blood. Every covenant is initiated by God, not negotiated by humans.', verse:'Jeremiah 31:31; Luke 22:20; Hebrews 8:6' },
+  { word:'Grace', orig:'Hebrew: חֶסֶד (hesed) / Greek: χάρις (charis)', def:'Unearned, undeserved favor given freely by God. Hesed in the Old Testament combines grace, loyal love, and steadfast commitment — God\'s covenant faithfulness that never gives up. Charis in the New Testament is the foundation of salvation: "By grace you have been saved through faith — and this is not your own doing; it is the gift of God." Grace is not permission to sin but the power not to.', verse:'Ephesians 2:8–9; Titus 2:11–12; Exodus 34:6' },
+  { word:'Justification', orig:'Greek: δικαίωσις (dikaiosis)', def:'The legal declaration by God that a sinner is righteous — not because they have become righteous, but because Christ\'s righteousness has been credited to their account. Justification is an event, not a process. It happens at the moment of faith. It is the answer to the question: "How can a sinful person stand before a holy God?"', verse:'Romans 3:21–26; 5:1; Galatians 2:16' },
+  { word:'Sanctification', orig:'Greek: ἁγιασμός (hagiasmos)', def:'The ongoing process by which God makes believers actually righteous in their character and conduct — distinct from justification (declared righteous). Involves the Holy Spirit, the Word of God, prayer, suffering, community, and time. Justification is what God says about you; sanctification is what God does in you.', verse:'John 17:17; 1 Thessalonians 4:3; Hebrews 12:10' },
+  { word:'Atonement', orig:'Hebrew: כִּפֻּר (kippur) / Greek: ἱλασμός (hilasmos)', def:'The means by which sin is covered and the broken relationship between God and humanity is repaired. In the Old Testament, animal sacrifices provided temporary atonement. The Day of Atonement (Yom Kippur) was the annual high point. Christ\'s death on the cross is the final, complete atonement — not merely covering sin but removing it. "He is the propitiation for our sins."', verse:'Leviticus 16; Romans 3:25; 1 John 2:2; Hebrews 9:12' },
+  { word:'Redemption', orig:'Hebrew: גָּאַל (gaal) / Greek: ἀπολύτρωσις (apolytrosis)', def:'To buy back someone or something that was enslaved or forfeited. The kinsman-redeemer (goel) in the Old Testament had the right and responsibility to restore a family member\'s freedom or land. Boaz redeems Ruth\'s family. Christ is the ultimate Kinsman-Redeemer — paying the price to buy back humanity from slavery to sin and death. "You were bought with a price."', verse:'Ruth 4; Romans 3:24; 1 Corinthians 6:20; Galatians 3:13' },
+  { word:'Propitiation', orig:'Greek: ἱλαστήριον (hilasterion)', def:'The satisfaction of God\'s righteous wrath against sin through the offering of a sacrifice. Not God being appeased by an angry offering — but God Himself providing the means by which His own wrath is satisfied. He is both the one offended and the one who provides the solution. "God put forward Christ as a propitiation by his blood."', verse:'Romans 3:25; 1 John 2:2; 4:10' },
+  { word:'Repentance', orig:'Hebrew: שׁוּב (shuv) / Greek: μετάνοια (metanoia)', def:'Shuv means to turn around — a complete change of direction. Metanoia means a change of mind that leads to a change of life. Repentance is not merely feeling sorry for sin but turning from it toward God. It is the first word of John the Baptist\'s preaching, Jesus\'s preaching, and Peter\'s call at Pentecost. Not a one-time event but a daily posture.', verse:'Acts 2:38; 3:19; 2 Corinthians 7:10; Luke 13:3' },
+  { word:'Faith', orig:'Hebrew: אֱמוּנָה (emunah) / Greek: πίστις (pistis)', def:'Not intellectual agreement with facts but active trust and reliance. Emunah comes from the root "amen" — firmness, steadiness, reliability. It is faith that holds on even when circumstances say let go. Pistis in the New Testament is the means by which justification is received — not as a human work but as an open hand receiving what God freely offers.', verse:'Hebrews 11:1; Romans 1:17; Habakkuk 2:4; James 2:17' },
+  { word:'Shalom', orig:'Hebrew: שָׁלוֹם (shalom)', def:'Commonly translated "peace" but far richer: completeness, wholeness, flourishing, right relationships in every direction — with God, others, creation, and self. Shalom is what Eden was and what the new creation will be. The prophets promised a Prince of Shalom. "Peace I leave with you; my peace I give to you. Not as the world gives do I give to you."', verse:'Isaiah 9:6; Numbers 6:24–26; John 14:27; Philippians 4:7' },
+  { word:'The Kingdom of God', orig:'Greek: βασιλεία τοῦ θεοῦ (basileia tou Theou)', def:'The central theme of Jesus\'s preaching — more than a place, it is the dynamic rule and reign of God. Already present wherever people submit to God\'s kingship. Not yet fully realized until Christ returns. The tension of "already but not yet" runs through every New Testament letter. We live in the overlap — the kingdom has come in Christ, but has not yet come in fullness.', verse:'Matthew 6:10; Luke 17:20–21; Revelation 11:15' },
+  { word:'Incarnation', orig:'Latin: in + caro (flesh)', def:'The eternal Son of God taking on human flesh — becoming fully human while remaining fully God. Not God appearing as a human, not a human elevated to divinity, but the union of two complete natures in one person. "The Word became flesh and dwelt among us." The most staggering claim in the history of religion.', verse:'John 1:14; Philippians 2:5–8; Hebrews 2:14–17; Colossians 2:9' },
+  { word:'Trinity', orig:'Latin: trinitas (three-ness)', def:'One God eternally existing in three distinct persons: Father, Son, and Holy Spirit — co-equal, co-eternal, and co-substantial. The word Trinity does not appear in Scripture but the reality does on every page. The Father is not the Son; the Son is not the Spirit; yet there is only one God. The most intellectually demanding and most personally significant doctrine in Christian theology.', verse:'Matthew 28:19; 2 Corinthians 13:14; John 17; Deuteronomy 6:4' },
+  { word:'Righteousness', orig:'Hebrew: צְדָקָה (tzedakah) / Greek: δικαιοσύνη (dikaiosyne)', def:'Conformity to God\'s character and standard — the opposite of what humanity produces on its own. Tzedakah in the Old Testament includes both right standing before God and doing right by others — justice and integrity as one. In the New Testament, righteousness is both imputed (credited to us through faith) and imparted (developed in us through sanctification).', verse:'Romans 1:17; Isaiah 61:10; Matthew 5:6; Philippians 3:9' },
+];
+
+window.initResources = function() {
+  renderTimeline();
+  renderPeople();
+  renderBooks('OT');
+  renderNames();
+  renderTerms();
+};
+
+window.showRes = function(section, btn) {
+  ['timeline','people','books','names','terms'].forEach(s => {
+    document.getElementById('res-' + s).style.display = s === section ? 'block' : 'none';
+  });
+  document.querySelectorAll('.res-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+};
+
+window.filterBooks = function(filter, btn) {
+  document.querySelectorAll('.books-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBooks(filter);
+};
+
+function renderTimeline() {
+  const el = document.getElementById('res-timeline');
+  el.innerHTML = '<div class="res-intro">Biblical history from Creation to Revelation. Dates are approximate based on common evangelical scholarship.</div>' +
+    TIMELINE.map(t => `
+      <div class="t-period">
+        <div class="t-date">${t.date}</div>
+        <div class="t-title">${t.title}</div>
+        <div class="t-desc">${t.desc}</div>
+        <div class="t-books">📖 ${t.books}</div>
+      </div>`).join('');
+}
+
+function renderPeople() {
+  const el = document.getElementById('res-people');
+  el.innerHTML = '<div class="res-intro">The major figures of Scripture — who they are, what they did, why they matter.</div>' +
+    PEOPLE.map(p => `
+      <div class="person-card">
+        <div class="person-name">${p.name}</div>
+        <div class="person-role">${p.role}</div>
+        <div class="person-desc">${p.desc}</div>
+        <div class="person-verse">📖 ${p.verse}</div>
+      </div>`).join('');
+}
+
+function renderBooks(filter) {
+  const books = filter === 'NT' ? BOOKS_NT : filter === 'OT' ? BOOKS_OT : [...BOOKS_OT, ...BOOKS_NT];
+  document.getElementById('books-content').innerHTML = books.map(b => `
+    <div class="book-card">
+      <div class="book-num">${b.num}</div>
+      <div class="book-info">
+        <div class="book-name">${b.name}</div>
+        <div class="book-meta">${b.meta}</div>
+        <div class="book-desc">${b.desc}</div>
+      </div>
+    </div>`).join('');
+  if (!document.getElementById('res-books').querySelector('.res-intro')) {
+    document.getElementById('res-books').insertAdjacentHTML('afterbegin', '<div class="res-intro">Every book of the Bible in two sentences. What it is and why it matters.</div>');
+  }
+}
+
+function renderNames() {
+  const el = document.getElementById('res-names');
+  el.innerHTML = '<div class="res-intro">The names of God in Hebrew and Greek reveal His character. Each name is a window into who He is.</div>' +
+    NAMES.map(n => `
+      <div class="name-card">
+        <div class="name-orig">${n.orig}</div>
+        <div class="name-trans">${n.trans}</div>
+        <div class="name-meaning">${n.meaning}</div>
+        <div class="name-desc">${n.desc}</div>
+      </div>`).join('');
+}
+
+function renderTerms() {
+  const el = document.getElementById('res-terms');
+  el.innerHTML = '<div class="res-intro">Theological words that carry enormous weight. Understanding these transforms how you read Scripture.</div>' +
+    TERMS.map(t => `
+      <div class="term-card">
+        <div class="term-word">${t.word}</div>
+        <div class="term-orig">${t.orig}</div>
+        <div class="term-def">${t.def}</div>
+        <div class="term-verse">📖 ${t.verse}</div>
+      </div>`).join('');
+}
+
+function timeAgo(ts) {
+  const d = Math.floor((Date.now()-ts)/1000);
+  if (d < 60) return 'just now';
+  if (d < 3600) return Math.floor(d/60)+'m ago';
+  if (d < 86400) return Math.floor(d/3600)+'h ago';
+  return Math.floor(d/86400)+'d ago';
+}
+</script>
+</body>
+</html>
