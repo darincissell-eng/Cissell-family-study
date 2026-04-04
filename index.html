@@ -400,10 +400,7 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
   <div style="margin-bottom:20px">
     <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px">Translation</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px" id="bs-trans-btns">
-      <button class="trans-btn active" data-bible="de4e12af7f28f599-02" onclick="selectTrans(this)">KJV</button>
-      <button class="trans-btn" data-bible="9879dbb7cfe39e4d-01" onclick="selectTrans(this)">World English</button>
-      <button class="trans-btn" data-bible="685d1470fe4d5c3b-01" onclick="selectTrans(this)">American Standard</button>
-      <button class="trans-btn" data-bible="7142879509583d59-01" onclick="selectTrans(this)">Good News</button>
+      <span style="font-family:'Courier New',monospace;font-size:10px;color:var(--text-faint)">Enter your API.Bible key in setup to load translations</span>
     </div>
   </div>
 
@@ -1037,13 +1034,59 @@ const BOLLS_TRANS = {
 
 // ── BIBLE SEARCH (API.Bible) ─────────────────
 const APIBIBLE_URL = 'https://api.scripture.api.bible/v1';
-let selectedBibleId = 'de4e12af7f28f599-02'; // KJV default
+let selectedBibleId = '';
+let availableBibles = [];
 
-window.initBibleSearch = function() {
+window.initBibleSearch = async function() {
   document.getElementById('bs-input').value = '';
   document.getElementById('bs-results').innerHTML = '';
   document.getElementById('bs-loading').style.display = 'none';
+
+  if (!bibleApiKey) {
+    document.getElementById('bs-results').innerHTML = `<div style="color:var(--text-faint);font-style:italic;font-size:15px;padding:10px 0">No API.Bible key found. Log out and re-enter your setup including the API.Bible key.</div>`;
+    return;
+  }
+
+  // Load available translations from this key
+  if (availableBibles.length === 0) {
+    await loadBibles();
+  }
 };
+
+async function loadBibles() {
+  const transEl = document.getElementById('bs-trans-btns');
+  transEl.innerHTML = `<span style="font-family:'Courier New',monospace;font-size:10px;color:var(--text-faint)">Loading your translations...</span>`;
+
+  try {
+    const res = await fetch(`${APIBIBLE_URL}/bibles?language=eng`, {
+      headers: { 'api-key': bibleApiKey }
+    });
+    const data = await res.json();
+    if (!data.data) throw new Error('No data');
+
+    // Filter to most useful English translations
+    const preferred = ['KJV','NIV','ESV','NASB','NLT','NKJV','WEB','ASV','MSG','AMP','CSB','NCV'];
+    availableBibles = data.data.filter(b =>
+      preferred.some(p => b.abbreviation && b.abbreviation.toUpperCase().includes(p))
+    ).slice(0, 10);
+
+    if (availableBibles.length === 0) {
+      availableBibles = data.data.filter(b => b.language && b.language.id === 'eng').slice(0, 8);
+    }
+
+    selectedBibleId = availableBibles[0]?.id || '';
+
+    transEl.innerHTML = availableBibles.map((b, i) => `
+      <button class="trans-btn ${i === 0 ? 'active' : ''}"
+        data-bible="${b.id}"
+        onclick="selectTrans(this)">
+        ${b.abbreviation || b.nameLocal || b.name}
+      </button>`).join('');
+
+  } catch(e) {
+    transEl.innerHTML = `<span style="font-family:'Courier New',monospace;font-size:10px;color:#e09090">Could not load translations. Check your API.Bible key.</span>`;
+  }
+}
 
 window.selectTrans = function(btn) {
   document.querySelectorAll('.trans-btn').forEach(b => b.classList.remove('active'));
@@ -1059,78 +1102,57 @@ window.quickRef = function(btn) {
 window.bsearch = async function() {
   const query = document.getElementById('bs-input').value.trim();
   if (!query) return;
+  if (!bibleApiKey) return;
+  if (!selectedBibleId) { await loadBibles(); if (!selectedBibleId) return; }
 
   const resultsEl = document.getElementById('bs-results');
   const loadingEl = document.getElementById('bs-loading');
   resultsEl.innerHTML = '';
   loadingEl.style.display = 'block';
 
-  if (!bibleApiKey) {
-    loadingEl.style.display = 'none';
-    resultsEl.innerHTML = `<div style="background:rgba(22,16,8,0.7);border:1px solid rgba(200,160,100,0.3);border-radius:6px;padding:18px 20px;color:var(--text-faint);font-size:15px;line-height:1.8">Bible Search requires an API.Bible key.<br>Log out and re-enter your setup including the API.Bible key.</div>`;
-    return;
-  }
-
   try {
-    // Step 1: Search for the passage reference
-    const searchUrl = `${APIBIBLE_URL}/bibles/${selectedBibleId}/search?query=${encodeURIComponent(query)}&limit=1`;
-    const searchRes = await fetch(searchUrl, {
-      headers: { 'api-key': bibleApiKey }
-    });
-    const searchData = await searchRes.json();
+    const transName = document.querySelector('.trans-btn.active')?.textContent?.trim() || 'Bible';
 
-    // Step 2: Try passage lookup directly (works better for specific references)
-    const passageUrl = `${APIBIBLE_URL}/bibles/${selectedBibleId}/passages/${encodeURIComponent(query)}?content-type=text&include-verse-numbers=true&include-titles=false`;
-    const passageRes = await fetch(passageUrl, {
-      headers: { 'api-key': bibleApiKey }
-    });
-    const passageData = await passageRes.json();
+    // Use search endpoint — accepts natural language like "John 3:16"
+    const url = `${APIBIBLE_URL}/bibles/${selectedBibleId}/search?query=${encodeURIComponent(query)}&limit=8&sort=relevance`;
+    const res = await fetch(url, { headers: { 'api-key': bibleApiKey } });
+    const data = await res.json();
 
     loadingEl.style.display = 'none';
 
-    if (passageData.data) {
-      const passage = passageData.data;
-      const transName = document.querySelector('.trans-btn.active')?.textContent || 'Bible';
-      // Clean up the text - remove extra whitespace and formatting tags
-      const cleanText = passage.content
-        .replace(/<[^>]*>/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-
+    if (!data.data || (!data.data.verses?.length && !data.data.passages?.length)) {
       resultsEl.innerHTML = `
-        <div style="background:rgba(22,16,8,0.7);border:1px solid rgba(100,200,120,0.25);border-top:2px solid rgba(100,200,120,0.5);border-radius:0 6px 6px 0;padding:20px 22px">
-          <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#90d890;margin-bottom:6px">${x(transName)}</div>
-          <div style="font-family:'Courier New',monospace;font-size:12px;color:var(--text-faint);margin-bottom:14px">${x(passage.reference)}</div>
-          <div style="font-size:18px;line-height:2;color:#ffffff">${x(cleanText)}</div>
+        <div style="background:rgba(22,16,8,0.7);border:1px solid rgba(200,100,100,0.25);border-radius:6px;padding:18px 20px">
+          <div style="color:#e09090;font-size:15px;margin-bottom:8px">No results found for "${x(query)}"</div>
+          <div style="color:var(--text-faint);font-size:13px;line-height:1.8">
+            Try a specific reference like:<br>
+            <span style="color:#90d890;font-family:'Courier New',monospace">John 3:16</span> &nbsp;·&nbsp;
+            <span style="color:#90d890;font-family:'Courier New',monospace">Psalm 23</span> &nbsp;·&nbsp;
+            <span style="color:#90d890;font-family:'Courier New',monospace">Romans 8:28</span>
+          </div>
         </div>`;
       return;
     }
 
-    // Fallback: show search results if passage lookup fails
-    if (searchData.data && searchData.data.verses && searchData.data.verses.length > 0) {
-      const verses = searchData.data.verses.slice(0, 5);
-      const transName = document.querySelector('.trans-btn.active')?.textContent || 'Bible';
-      resultsEl.innerHTML = `
-        <div style="font-family:'Courier New',monospace;font-size:11px;color:var(--text-faint);margin-bottom:14px;letter-spacing:0.15em">SEARCH RESULTS FOR "${x(query)}"</div>
-        ${verses.map(v => `
-          <div style="background:rgba(22,16,8,0.7);border:1px solid rgba(100,200,120,0.2);border-radius:6px;padding:16px 18px;margin-bottom:10px">
-            <div style="font-family:'Courier New',monospace;font-size:11px;color:#90d890;margin-bottom:8px">${x(v.reference)}</div>
-            <div style="font-size:17px;line-height:1.9;color:#ffffff">${x(v.text.trim())}</div>
-          </div>`).join('')}`;
-      return;
-    }
+    const verses = data.data.verses || [];
+    const query_ref = data.data.query || query;
 
-    // Nothing found
-    resultsEl.innerHTML = `
-      <div style="background:rgba(22,16,8,0.7);border:1px solid rgba(200,100,100,0.25);border-radius:6px;padding:18px 20px">
-        <div style="color:#e09090;font-size:15px;margin-bottom:8px">Passage not found.</div>
-        <div style="color:var(--text-faint);font-size:13px;line-height:1.8">
-          Try formatting like:<br>
-          <span style="color:#90d890;font-family:'Courier New',monospace">JHN.3.16</span> &nbsp;·&nbsp;
-          <span style="color:#90d890;font-family:'Courier New',monospace">PSA.23</span> &nbsp;·&nbsp;
-          <span style="color:#90d890;font-family:'Courier New',monospace">ROM.8.28-ROM.8.39</span>
-        </div>
+    // Group consecutive verses from same chapter into blocks
+    let html = `
+      <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-faint);margin-bottom:14px">
+        ${x(transName)} · ${verses.length} verse${verses.length !== 1 ? 's' : ''} found
       </div>`;
+
+    verses.forEach(v => {
+      const cleanText = (v.text || '').replace(/<[^>]*>/g, '').trim();
+      html += `
+        <div style="background:rgba(22,16,8,0.7);border:1px solid rgba(100,200,120,0.2);border-left:3px solid rgba(100,200,120,0.5);border-radius:0 6px 6px 0;padding:16px 18px;margin-bottom:10px">
+          <div style="font-family:'Courier New',monospace;font-size:11px;color:#90d890;margin-bottom:10px;letter-spacing:0.1em">${x(v.reference)}</div>
+          <div style="font-size:18px;line-height:2;color:#ffffff">${x(cleanText)}</div>
+        </div>`;
+    });
+
+    resultsEl.innerHTML = html;
 
   } catch(e) {
     loadingEl.style.display = 'none';
