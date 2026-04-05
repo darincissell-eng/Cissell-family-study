@@ -225,6 +225,7 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
   <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding-bottom:40px">
     <button class="enter-btn" onclick="enterPrivate()">Enter — Tozer</button>
     <button class="enter-btn" style="border-color:rgba(100,160,200,0.4);color:#a8d0f0" onclick="enterScripture()">Enter — Scripture Study</button>
+    <button class="enter-btn" style="border-color:rgba(150,200,150,0.4);color:#a8d8a8" onclick="enterFamily()">Enter — Family Room</button>
     <button class="enter-btn" style="border-color:rgba(200,160,100,0.4);color:#f0c878" onclick="go('s-resources');initResources()">Enter — Resource Room</button>
     <div class="enter-hint">Bring what you are actually carrying</div>
   </div>
@@ -578,8 +579,9 @@ window.enterScripture = function() {
 window.enterFamily = function() {
   document.getElementById('fam-sub').textContent = who + ' · Family Room';
   document.getElementById('post-lbl').textContent = who + ' — post a reflection, question, or something worth sharing';
-  loadBoard();
   go('s-fam');
+  // Load board after navigation so tab switch is always instant
+  setTimeout(loadBoard, 50);
 };
 
 // ── PRIVATE ──────────────────────────────────
@@ -613,14 +615,20 @@ function renderPriv() {
       el.innerHTML += `<div class="msg-user"><div class="msg-user-inner">${x(m.content)}</div></div>`;
     } else {
       const last = i===privH.length-1;
-      el.innerHTML += `<div class="msg-tozer"><div class="msg-lbl"><span></span>Tozer<span></span></div><div class="msg-text">${x(m.content)}</div>${last?`<button class="share-btn" onclick="window.sharePost(${i})">Share to Family Room</button>`:''}</div>`;
+      el.innerHTML += `
+        <div class="msg-tozer">
+          <div class="msg-lbl"><span></span>Tozer<span></span></div>
+          <div class="msg-text">${x(m.content)}</div>
+          <div style="display:flex;gap:10px;align-items:center;margin-left:18px;margin-top:8px">
+            ${last ? `<button class="share-btn" onclick="window.sharePost(${i})">Share to Family Room</button>` : ''}
+            <button onclick="window.deletePrivPair(${i})" style="background:transparent;border:none;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color='#c07070'" onmouseout="this.style.color='var(--text-faint)'">✕ Delete</button>
+          </div>
+        </div>`;
     }
   });
-  // Auto-save this person's conversation
   if (privH.length > 0) {
     localStorage.setItem('tz_priv_' + who, JSON.stringify(privH));
   }
-  // Show clear button if conversation exists
   const clearBtn = document.getElementById('clear-conv');
   if (clearBtn) clearBtn.style.display = privH.length > 0 ? 'inline-block' : 'none';
   dn();
@@ -640,12 +648,25 @@ window.sharePost = async function(ai) {
 };
 
 window.clearConv = function() {
-  if (!confirm('Clear your conversation with Tozer? This cannot be undone.')) return;
+  if (!confirm('Clear your entire conversation? This cannot be undone.')) return;
   privH = [];
   localStorage.removeItem('tz_priv_' + who);
   document.getElementById('priv-msgs').innerHTML = '';
   document.getElementById('priv-sugg').style.display = 'block';
   document.getElementById('clear-conv').style.display = 'none';
+};
+
+window.deletePrivPair = function(answerIdx) {
+  const questionIdx = answerIdx - 1;
+  if (questionIdx < 0 || privH[questionIdx].role !== 'user') return;
+  privH.splice(questionIdx, 2);
+  if (privH.length === 0) {
+    localStorage.removeItem('tz_priv_' + who);
+    document.getElementById('priv-sugg').style.display = 'block';
+  } else {
+    localStorage.setItem('tz_priv_' + who, JSON.stringify(privH));
+  }
+  renderPriv();
 };
 
 window.deletePost = async function(postId) {
@@ -680,11 +701,20 @@ window.bsend = async function() {
 function renderBible() {
   const el = document.getElementById('bible-msgs');
   el.innerHTML = '';
-  bibleH.forEach((m) => {
+  bibleH.forEach((m, i) => {
     if (m.role === 'user') {
       el.innerHTML += `<div class="msg-user"><div class="msg-user-inner" style="border-color:rgba(100,160,200,0.25)">${x(m.content)}</div></div>`;
     } else {
-      el.innerHTML += `<div class="msg-tozer"><div class="msg-lbl" style="color:rgba(100,160,200,0.7)"><span style="background:rgba(100,160,200,0.5)"></span>Scripture<span style="background:rgba(100,160,200,0.5)"></span></div><div class="msg-text" style="border-left-color:rgba(100,160,200,0.35)">${x(m.content)}</div></div>`;
+      const isLast = i === bibleH.length - 1;
+      el.innerHTML += `
+        <div class="msg-tozer">
+          <div class="msg-lbl" style="color:rgba(100,160,200,0.7)"><span style="background:rgba(100,160,200,0.5)"></span>Scripture<span style="background:rgba(100,160,200,0.5)"></span></div>
+          <div class="msg-text" style="border-left-color:rgba(100,160,200,0.35)">${x(m.content)}</div>
+          <div style="display:flex;gap:10px;align-items:center;margin-left:18px;margin-top:8px">
+            ${isLast ? `<button class="share-btn" onclick="window.shareBiblePost(${i})">Share to Family Room</button>` : ''}
+            <button onclick="window.deleteBiblePair(${i})" style="background:transparent;border:none;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color='#c07070'" onmouseout="this.style.color='var(--text-faint)'">✕ Delete</button>
+          </div>
+        </div>`;
     }
   });
   if (bibleH.length > 0) {
@@ -702,6 +732,34 @@ window.clearBible = function() {
   document.getElementById('bible-msgs').innerHTML = '';
   document.getElementById('bible-sugg').style.display = 'block';
   document.getElementById('clear-bible').style.display = 'none';
+};
+
+window.deleteBiblePair = function(answerIdx) {
+  const questionIdx = answerIdx - 1;
+  if (questionIdx < 0 || bibleH[questionIdx].role !== 'user') return;
+  bibleH.splice(questionIdx, 2);
+  if (bibleH.length === 0) {
+    localStorage.removeItem('tz_bible_' + who);
+    document.getElementById('bible-sugg').style.display = 'block';
+    document.getElementById('clear-bible').style.display = 'none';
+  } else {
+    localStorage.setItem('tz_bible_' + who, JSON.stringify(bibleH));
+  }
+  renderBible();
+};
+
+window.shareBiblePost = async function(ai) {
+  const q = bibleH[ai-1]; const a = bibleH[ai];
+  if (!q || q.role !== 'user') return;
+  const btn = document.querySelector('#bible-msgs .share-btn');
+  if (btn) btn.textContent = 'Sharing...';
+  const body = `From Scripture Study:\n\nQuestion: "${q.content}"\n\n${a.content}`;
+  await fbPost(body);
+  if (btn) btn.style.display = 'none';
+  const badge = document.createElement('div');
+  badge.className = 'shared-badge';
+  badge.textContent = '✦ Shared to Family Room';
+  document.querySelector('#bible-msgs .msg-tozer:last-child')?.appendChild(badge);
 };
 
 async function bibleAsk(messages) {
@@ -767,14 +825,22 @@ window.submitReply = async function(postId) {
 };
 
 function loadBoard() {
+  const el = document.getElementById('board');
   if (!db) {
-    document.getElementById('board').innerHTML = '<div class="board-empty">Family Room requires Firebase setup.<br>Contact your father for the Firebase URL.</div>';
+    el.innerHTML = '<div class="board-empty">Family Room requires Firebase setup.<br>Enter your Firebase URL in the setup screen.</div>';
     return;
   }
-  if (boardUnsub) boardUnsub();
-  boardUnsub = db.ref('posts').on('value', snap => {
-    renderBoard(snap.val());
-  });
+  el.innerHTML = '<div class="board-empty" style="opacity:0.5">Loading...</div>';
+  try {
+    if (boardUnsub) { try { boardUnsub(); } catch(e) {} }
+    boardUnsub = db.ref('posts').on('value', snap => {
+      renderBoard(snap.val());
+    }, err => {
+      el.innerHTML = '<div class="board-empty">Could not load family room. Check your Firebase URL.</div>';
+    });
+  } catch(e) {
+    el.innerHTML = '<div class="board-empty">Could not connect to family room.</div>';
+  }
 }
 
 function renderBoard(data) {
@@ -1021,6 +1087,7 @@ window.initResources = function() {
   renderBooks('OT');
   renderNames();
   renderTerms();
+  window.scrollTo(0, 0);
 };
 
 window.showRes = function(section, btn) {
@@ -1029,12 +1096,14 @@ window.showRes = function(section, btn) {
   });
   document.querySelectorAll('.res-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  window.scrollTo(0, 0);
 };
 
 window.filterBooks = function(filter, btn) {
   document.querySelectorAll('.books-filter').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderBooks(filter);
+  window.scrollTo(0, 0);
 };
 
 function renderTimeline() {
