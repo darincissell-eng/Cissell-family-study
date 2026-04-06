@@ -185,6 +185,8 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
     <p class="api-intro">This is a private family resource.<br>Enter your API key to begin.</p>
     <div class="field-label">Anthropic API Key (required)</div>
     <input type="password" id="apiIn" placeholder="sk-ant-..." autocomplete="off" />
+    <div class="field-label" style="margin-top:4px">ESV Bible API Key (for Bible Room)</div>
+    <input type="text" id="esvKeyIn" placeholder="ESV API key..." autocomplete="off" />
     <div class="field-label" style="margin-top:4px">Firebase URL (optional — needed for Family Room sync)</div>
     <input type="text" id="fbIn" placeholder="https://your-project-default-rtdb.firebaseio.com" autocomplete="off" />
     <button class="primary-btn" onclick="saveSetup()">Enter</button>
@@ -227,6 +229,7 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
     <button class="enter-btn" style="border-color:rgba(100,160,200,0.4);color:#a8d0f0" onclick="enterScripture()">Enter — Scripture Study</button>
     <button class="enter-btn" style="border-color:rgba(150,200,150,0.4);color:#a8d8a8" onclick="enterFamily()">Enter — Family Room</button>
     <button class="enter-btn" style="border-color:rgba(200,160,100,0.4);color:#f0c878" onclick="go('s-resources');initResources()">Enter — Resource Room</button>
+    <button class="enter-btn" style="border-color:rgba(100,200,120,0.4);color:#90d890" onclick="go('s-esv')">Enter — Bible</button>
     <div class="enter-hint">Bring what you are actually carrying</div>
   </div>
 </div>
@@ -245,6 +248,7 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
         <button class="nav-tab" onclick="enterFamily()">Family</button>
         <button class="nav-tab" onclick="enterScripture()">Scripture</button>
         <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
+        <button class="nav-tab" onclick="go('s-esv')">Bible</button>
       </div>
       <button id="clear-conv" onclick="window.clearConv()" style="display:none;background:transparent;border:none;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color='#c07070'" onmouseout="this.style.color='var(--text-faint)'">✕ Clear conversation</button>
     </div>
@@ -291,6 +295,7 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
       <button class="nav-tab active">Family</button>
       <button class="nav-tab" onclick="enterScripture()">Scripture</button>
         <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
+        <button class="nav-tab" onclick="go('s-esv')">Bible</button>
     </div>
   </div>
 
@@ -325,6 +330,7 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
         <button class="nav-tab" onclick="enterFamily()">Family</button>
         <button class="nav-tab active" style="border-color:rgba(100,160,200,0.5);color:#a8d0f0;background:rgba(40,80,120,0.3)">Scripture</button>
         <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
+        <button class="nav-tab" onclick="go('s-esv')">Bible</button>
       </div>
       <button id="clear-bible" onclick="window.clearBible()" style="display:none;background:transparent;border:none;font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color='#c07070'" onmouseout="this.style.color='var(--text-faint)'">✕ Clear session</button>
     </div>
@@ -360,6 +366,66 @@ textarea.main-ta::placeholder { color: var(--text-faint); }
 
 </div>
 
+
+<!-- BIBLE ROOM -->
+<div id="s-esv" class="screen">
+  <div class="chat-hdr">
+    <button class="back-link" onclick="go('s-who')">← Change</button>
+    <div class="chat-hdr-center">
+      <div class="chat-hdr-title" style="color:#90d890">Bible — ESV</div>
+      <div class="chat-hdr-sub">English Standard Version</div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab" onclick="go('s-priv')">Private</button>
+      <button class="nav-tab" onclick="enterFamily()">Family</button>
+      <button class="nav-tab" onclick="enterScripture()">Scripture</button>
+      <button class="nav-tab" onclick="go('s-resources');initResources()">Resources</button>
+      <button class="nav-tab active" style="border-color:rgba(100,200,120,0.5);color:#90d890;background:rgba(40,100,60,0.3)">Bible</button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div style="margin-bottom:16px">
+    <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px">Enter any passage reference</div>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="esv-input"
+        placeholder="e.g. John 3:16 or Psalm 23 or Romans 8:28-39"
+        style="flex:1;background:rgba(10,8,4,0.8);border:1px solid rgba(100,200,120,0.3);border-radius:3px;padding:13px 16px;color:#ffffff;font-size:17px;font-family:'Palatino Linotype',Georgia,serif;font-style:italic;outline:none;transition:border-color 0.2s"
+        onfocus="this.style.borderColor='rgba(100,200,120,0.7)'"
+        onblur="this.style.borderColor='rgba(100,200,120,0.3)'"
+        onkeydown="if(event.key==='Enter') esvSearch()" />
+      <button onclick="esvSearch()" style="background:rgba(40,100,60,0.4);border:1px solid rgba(100,200,120,0.4);border-radius:3px;padding:0 20px;color:#90d890;font-size:20px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.background='rgba(40,100,60,0.7)'" onmouseout="this.style.background='rgba(40,100,60,0.4)'">⌕</button>
+    </div>
+  </div>
+
+  <!-- Quick references -->
+  <div style="margin-bottom:24px">
+    <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px">Quick references</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <button class="qref" onclick="esvQuick(this)">John 3:16</button>
+      <button class="qref" onclick="esvQuick(this)">Proverbs 3:5-6</button>
+      <button class="qref" onclick="esvQuick(this)">Psalm 23</button>
+      <button class="qref" onclick="esvQuick(this)">Romans 8:28-39</button>
+      <button class="qref" onclick="esvQuick(this)">Isaiah 40:28-31</button>
+      <button class="qref" onclick="esvQuick(this)">Philippians 4:6-13</button>
+      <button class="qref" onclick="esvQuick(this)">Jeremiah 29:11-13</button>
+      <button class="qref" onclick="esvQuick(this)">Matthew 6:25-34</button>
+      <button class="qref" onclick="esvQuick(this)">Hebrews 11:1-6</button>
+      <button class="qref" onclick="esvQuick(this)">1 Corinthians 13</button>
+      <button class="qref" onclick="esvQuick(this)">James 1:2-8</button>
+      <button class="qref" onclick="esvQuick(this)">Psalm 46</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="esv-loading" style="display:none;padding:20px 0">
+    <div class="tw"><div class="dot" style="background:#90d890"></div><div class="dot" style="background:#90d890"></div><div class="dot" style="background:#90d890"></div></div>
+  </div>
+
+  <!-- Results -->
+  <div id="esv-results"></div>
+
+</div>
 
 <!-- RESOURCE ROOM -->
 <div id="s-resources" class="screen">
@@ -486,6 +552,7 @@ Be thorough but not exhausting. Every word earns its place. The goal is not to i
 // ── STATE ────────────────────────────────────
 let apiKey = '';
 let fbUrl  = '';
+let esvKey = '';
 let who    = '';
 let privH  = [];
 let bibleH = [];
@@ -509,6 +576,8 @@ function initFB(url) {
 window.onload = () => {
   const k = localStorage.getItem('tz_key');
   const f = localStorage.getItem('tz_fb');
+  const ek = localStorage.getItem('tz_esv');
+  if (ek) esvKey = ek;
   if (k) {
     apiKey = k;
     if (f) { fbUrl = f; try { initFB(f); } catch(e) {} }
@@ -534,6 +603,8 @@ window.saveSetup = function() {
   }
   apiKey = k;
   localStorage.setItem('tz_key', k);
+  const ek = document.getElementById('esvKeyIn').value.trim();
+  if (ek) { esvKey = ek; localStorage.setItem('tz_esv', ek); }
   if (f) {
     fbUrl = f;
     localStorage.setItem('tz_fb', f);
@@ -920,7 +991,90 @@ function dn() { setTimeout(()=>window.scrollTo(0,document.body.scrollHeight),80)
 function x(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/\n/g,'<br>');
 }
-// ── RESOURCE ROOM ────────────────────────────
+// ── ESV BIBLE ROOM ───────────────────────────
+window.esvQuick = function(btn) {
+  document.getElementById('esv-input').value = btn.textContent.trim();
+  esvSearch();
+};
+
+window.esvSearch = async function() {
+  const query = document.getElementById('esv-input').value.trim();
+  if (!query) return;
+
+  const resultsEl = document.getElementById('esv-results');
+  const loadingEl = document.getElementById('esv-loading');
+  resultsEl.innerHTML = '';
+  loadingEl.style.display = 'block';
+
+  if (!esvKey) {
+    loadingEl.style.display = 'none';
+    resultsEl.innerHTML = `
+      <div style="background:rgba(22,16,8,0.8);border:1px solid rgba(200,160,100,0.3);border-radius:6px;padding:18px 20px;color:var(--text-dim);font-size:16px;line-height:1.8">
+        No ESV key found.<br>
+        <span style="font-size:14px;color:var(--text-faint)">Log out and re-enter your setup including the ESV API key.</span>
+      </div>`;
+    return;
+  }
+
+  try {
+    const params = new URLSearchParams({
+      q: query,
+      'include-headings': 'false',
+      'include-footnotes': 'false',
+      'include-verse-numbers': 'true',
+      'include-short-copyright': 'false',
+      'include-passage-references': 'true',
+    });
+
+    const res = await fetch(`https://api.esv.org/v3/passage/text/?${params}`, {
+      headers: { Authorization: `Token ${esvKey}` }
+    });
+
+    loadingEl.style.display = 'none';
+
+    if (!res.ok) {
+      resultsEl.innerHTML = `
+        <div style="background:rgba(22,16,8,0.8);border:1px solid rgba(200,100,100,0.3);border-radius:6px;padding:18px 20px">
+          <div style="color:#e09090;font-size:16px;margin-bottom:6px">Could not find that passage.</div>
+          <div style="color:var(--text-faint);font-size:14px;line-height:1.8">
+            Try a reference like:<br>
+            <span style="color:#90d890;font-family:'Courier New',monospace">John 3:16</span> &nbsp;·&nbsp;
+            <span style="color:#90d890;font-family:'Courier New',monospace">Psalm 23</span> &nbsp;·&nbsp;
+            <span style="color:#90d890;font-family:'Courier New',monospace">Romans 8:28-39</span>
+          </div>
+        </div>`;
+      return;
+    }
+
+    const data = await res.json();
+    const passages = data.passages || [];
+
+    if (!passages.length || !passages[0].trim()) {
+      resultsEl.innerHTML = `
+        <div style="background:rgba(22,16,8,0.8);border:1px solid rgba(200,100,100,0.3);border-radius:6px;padding:18px 20px;color:#e09090;font-size:16px">
+          No results found for "${x(query)}"
+        </div>`;
+      return;
+    }
+
+    const ref = data.canonical || query;
+    const text = passages[0].trim();
+
+    resultsEl.innerHTML = `
+      <div style="background:rgba(22,16,8,0.8);border:1px solid rgba(100,200,120,0.25);border-left:3px solid rgba(100,200,120,0.6);border-radius:0 6px 6px 0;padding:20px 22px">
+        <div style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#90d890;margin-bottom:6px">English Standard Version</div>
+        <div style="font-family:'Courier New',monospace;font-size:12px;color:var(--text-faint);margin-bottom:16px">${x(ref)}</div>
+        <div style="font-size:18px;line-height:2.1;color:#ffffff;white-space:pre-wrap">${x(text)}</div>
+        <div style="margin-top:14px;font-family:'Courier New',monospace;font-size:10px;color:rgba(100,200,120,0.4);letter-spacing:0.1em">ESV® Bible · Crossway</div>
+      </div>`;
+
+  } catch(e) {
+    loadingEl.style.display = 'none';
+    resultsEl.innerHTML = `<div style="color:var(--text-faint);font-style:italic;font-size:15px;padding:10px 0">Connection error. Check your internet and try again.</div>`;
+  }
+};
+
+
 
 const TIMELINE = [
   { date:'Before Time', title:'Creation', desc:'God creates the heavens, earth, and humanity in six days. Adam and Eve placed in Eden. Perfect relationship between Creator and creation. The foundation of all that follows.', books:'Genesis 1–2' },
